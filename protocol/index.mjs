@@ -1,0 +1,1 @@
+export const ECHO_PROTOCOL = '/echo/1.0.0'
