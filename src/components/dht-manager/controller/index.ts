@@ -121,11 +121,11 @@ export const controller = async (context: DHTManager) => {
         let timerId = null
         // Событие при добавлении пира
         routingTable.addEventListener('peer:add', (event: any) => {
-            console.log(`----- 🎯 [${dhtType}] peer:add`, event.detail);
             if(timerId) {
                 clearTimeout(timerId)
             }
             timerId = setTimeout(() => {
+                console.log(`----- 🎯 [${dhtType}] peer:add`, event.detail);
                 (context as any).refreshData(dhtType as any).catch((e: any) => {
                     console.error(`Error refreshing ${dhtType} DHT:`, e);
                 });

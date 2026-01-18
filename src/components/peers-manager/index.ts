@@ -34,7 +34,7 @@ export interface PeersManagerState {
 
 export class PeersManager extends BaseComponent {
     static override observedAttributes = ['data-auto-refresh', 'data-refresh-interval'];
-
+    public timerId: ReturnType<typeof setTimeout> | null = null;
     constructor() {
         super();
         this._templateMethods = {
@@ -97,7 +97,6 @@ export class PeersManager extends BaseComponent {
     async connectToLibp2pNode(): Promise<void> {
         try {
             const libp2pNode = await this.getComponentAsync('libp2p-node', 'libp2p-node-1');
-            let timerId: number | null = null
             if (libp2pNode) {
                 const state = this.state as PeersManagerState;
                 state.libp2pNodeConnected = true;
@@ -106,10 +105,10 @@ export class PeersManager extends BaseComponent {
                     type: 'SET_PEERS_MANAGER_LISTENER',
                     data: {
                         callback: (peers: any[]) => {
-                            if(timerId) {
-                                clearTimeout(timerId)
+                            if(this.timerId) {
+                                clearTimeout(this.timerId)
                             }
-                            timerId = setTimeout(() => {
+                            this.timerId = setTimeout(() => {
                                 console.log('@@@@@@@@@@@@@ SET_PEERS_MANAGER_LISTENER callback @@@@@@@@@@@@@', peers)
                                 this.updateFromLibp2p(peers);
                             }, 2000)
@@ -563,6 +562,7 @@ export class PeersManager extends BaseComponent {
         if (this._controller?.destroy) {
             await this._controller.destroy();
         }
+        clearTimeout(this.timerId)
     }
 }
 
