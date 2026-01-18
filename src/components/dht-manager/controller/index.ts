@@ -118,7 +118,7 @@ export const controller = async (context: DHTManager) => {
 
         const routingTable = dhtInstance.routingTable;
 
-        let timerId = null
+        let timerId: number | null = null
         // Событие при добавлении пира
         routingTable.addEventListener('peer:add', (event: any) => {
             if(timerId) {
