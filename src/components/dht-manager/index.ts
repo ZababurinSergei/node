@@ -841,7 +841,6 @@ export class DHTManager extends BaseComponent {
                 case 'UPDATE_DISPLAY':
                     await this.updateDHTDisplay(event.data);
                     return { success: true, message: 'Display updated' };
-
                 default:
                     console.warn(`[DHTManager] Unknown message type: ${event.type}`);
                     return {
@@ -921,6 +920,7 @@ export class DHTManager extends BaseComponent {
             }
 
             console.log('@@@@@@@@@@ renderPart @@@@@@@@@@ 8')
+            console.trace()
             await this.renderPart({
                 partName: 'renderDHTStats',
                 state: this.state,
