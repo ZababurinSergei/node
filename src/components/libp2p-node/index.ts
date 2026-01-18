@@ -51,7 +51,7 @@ export class Libp2pNode extends BaseComponent {
     // НОВОЕ: Добавлено для интеграции с PeersManager
     private peersManagerListener: ((peers: any[]) => void) | null = null;
     private lastPeersUpdate: number = 0;
-    private readonly PEERS_UPDATE_INTERVAL = 5000; // 5 секунд между обновлениями
+    // private readonly PEERS_UPDATE_INTERVAL = 5000; // 5 секунд между обновлениями
 
     constructor() {
         super();

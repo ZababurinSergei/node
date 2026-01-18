@@ -1,0 +1,69 @@
+{
+  "name": "index",
+  "timestamp": "2026-01-18T18:21:47.002Z",
+  "paths": {
+    "source": "/home/sergei/Рабочий стол/in-progress/libp2p-browser/packages/node/src",
+    "output": "/home/sergei/Рабочий стол/in-progress/libp2p-browser/packages/node/docs"
+  },
+  "output": {
+    "file": "index.mjs",
+    "format": "esm",
+    "platform": "browser"
+  },
+  "build": {
+    "tool": "esbuild",
+    "target": [
+      "es2022",
+      "chrome114",
+      "firefox115",
+      "safari14"
+    ],
+    "minify": true,
+    "treeShaking": true,
+    "bundle": true,
+    "virtualCss": true,
+    "supportsTopLevelAwait": true
+  },
+  "includes": {
+    "dependencies": [
+      "@chainsafe/libp2p-gossipsub",
+      "@chainsafe/libp2p-noise",
+      "@chainsafe/libp2p-yamux",
+      "@libp2p/bootstrap",
+      "@libp2p/circuit-relay-v2",
+      "@libp2p/crypto",
+      "@libp2p/dcutr",
+      "@libp2p/floodsub",
+      "@libp2p/http",
+      "@libp2p/http-fetch",
+      "@libp2p/http-ping",
+      "@libp2p/identify",
+      "@libp2p/interface",
+      "@libp2p/interface-transport",
+      "@libp2p/kad-dht",
+      "@libp2p/logger",
+      "@libp2p/peer-id",
+      "@libp2p/peer-store",
+      "@libp2p/ping",
+      "@libp2p/pubsub-peer-discovery",
+      "@libp2p/utils",
+      "@libp2p/webrtc",
+      "@libp2p/websockets",
+      "@libp2p/webtransport",
+      "@multiformats/multiaddr",
+      "@multiformats/multiaddr-matcher",
+      "blockstore-core",
+      "datastore-core",
+      "datastore-idb",
+      "libp2p",
+      "peer-id",
+      "prom-client",
+      "protons-runtime",
+      "reflect-metadata",
+      "uint8arrays"
+    ],
+    "totalDependencies": 35,
+    "cssFiles": 15,
+    "virtualCss": true
+  }
+}

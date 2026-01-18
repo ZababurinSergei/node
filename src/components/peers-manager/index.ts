@@ -97,7 +97,7 @@ export class PeersManager extends BaseComponent {
     async connectToLibp2pNode(): Promise<void> {
         try {
             const libp2pNode = await this.getComponentAsync('libp2p-node', 'libp2p-node-1');
-            let timerId = null
+            let timerId: number | null = null
             if (libp2pNode) {
                 const state = this.state as PeersManagerState;
                 state.libp2pNodeConnected = true;

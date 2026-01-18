@@ -1,3 +1,4 @@
+import { importCss } from './virtual-css'
 import {LIBP2P_DEFAULT_BOOTSTRAP_NODES} from './lib/libp2p/libp2p-browser'
 import {BaseComponent} from './base/base-component';
 import './components/libp2p-node';
@@ -18,53 +19,8 @@ interface ComponentConfig {
 
 const components: Record<string, any> = {};
 
-// interface VirtualCSSModule {
-//     getCSSForComponent: (componentName: string) => string | null;
-//     getCSSByPath?: (filePath: string) => string | null;
-//     getAllCSS?: () => string;
-//     injectCSS?: () => void;
-// }
-
-// let cssModule: VirtualCSSModule | null = null;
-
-// async function loadCSSModule(): Promise<VirtualCSSModule | null> {
-//     try {
-//         return await import('virtual:css') as VirtualCSSModule;
-//     } catch (e) {
-//         return null;
-//     }
-// }
-//
-// let cssModuleInitialized = false;
-
-// async function ensureCSSModule(): Promise<boolean> {
-//     try {
-//         console.log('dddddddddd 2222 ddddddddddd', cssModule)
-//         if (!cssModuleInitialized) {
-//             cssModule = await loadCSSModule();
-//             console.log('dddddddddddddddddd', cssModule)
-//             if (cssModule) {
-//                 cssModuleInitialized = true;
-//             }
-//             return  true
-//         } else {
-//             return  false
-//         }
-//     } catch (e) {
-//         return false
-//     }
-// }
-
 const appInit = async (): Promise<any> => {
-    // try {
-    // await ensureCSSModule();
-    // } catch (e) {
-    //     console.error('ERROR', e)
-    // }
-
-    // if (cssModule && cssModule.injectCSS) {
-    //     cssModule.injectCSS();
-    // }
+    await importCss()
 
     if (isModuleFederation) {
         const componentConfigs: ComponentConfig[] = [{

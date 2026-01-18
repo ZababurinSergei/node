@@ -2,7 +2,7 @@
 
 import { build } from 'esbuild';
 import { writeFileSync, mkdirSync, existsSync, readFileSync, statSync, readdirSync } from 'fs';
-import { join, dirname, relative, extname } from 'path';
+import { join, dirname, relative, extname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -13,11 +13,42 @@ class CSSBundler {
         this.basePath = basePath;
         this.cssContent = new Map();
         this.componentCSSMap = new Map();
+        this.fileDependencies = new Map();
     }
 
-    // Находим все CSS файлы в проекте
+    // Находим все CSS файлы в проекте, включая @import
     async findCSSFiles(dir) {
-        const files = [];
+        const files = new Set();
+        const importedFiles = new Set();
+
+        const scanCSSImports = (content, baseDir) => {
+            const importRegex = /@import\s+(?:url\()?['"]([^'"]+\.css)['"]\)?/g;
+            let match;
+            while ((match = importRegex.exec(content)) !== null) {
+                const importPath = match[1];
+                let resolvedPath;
+
+                if (importPath.startsWith('./') || importPath.startsWith('../')) {
+                    resolvedPath = join(baseDir, importPath);
+                } else {
+                    resolvedPath = join(dir, importPath);
+                }
+
+                const normalizedPath = resolve(resolvedPath);
+                if (!importedFiles.has(normalizedPath)) {
+                    importedFiles.add(normalizedPath);
+                    if (existsSync(normalizedPath)) {
+                        try {
+                            const importContent = readFileSync(normalizedPath, 'utf-8');
+                            scanCSSImports(importContent, dirname(normalizedPath));
+                            files.add(normalizedPath);
+                        } catch (error) {
+                            console.warn(`⚠️ Cannot read imported CSS file ${normalizedPath}:`, error.message);
+                        }
+                    }
+                }
+            }
+        };
 
         const scanDirectory = (currentDir) => {
             try {
@@ -27,12 +58,18 @@ class CSSBundler {
                     const fullPath = join(currentDir, entry.name);
 
                     if (entry.isDirectory()) {
-                        // Пропускаем node_modules и скрытые папки
                         if (!entry.name.includes('node_modules') && !entry.name.startsWith('.')) {
                             scanDirectory(fullPath);
                         }
                     } else if (entry.isFile() && extname(entry.name) === '.css') {
-                        files.push(fullPath);
+                        files.add(fullPath);
+
+                        try {
+                            const content = readFileSync(fullPath, 'utf-8');
+                            scanCSSImports(content, dirname(fullPath));
+                        } catch (error) {
+                            console.warn(`⚠️ Cannot read CSS file ${fullPath}:`, error.message);
+                        }
                     }
                 }
             } catch (error) {
@@ -41,19 +78,31 @@ class CSSBundler {
         };
 
         scanDirectory(dir);
-        return files;
+
+        const allFiles = Array.from(files);
+        console.log(`🎨 Found ${allFiles.length} CSS files (including imports)`);
+
+        return allFiles;
     }
 
     // Обрабатываем CSS файлы и создаем карту компонентов
     async processCSSFiles(cssFiles) {
-        for (const filePath of cssFiles) {
+        const processedFiles = new Set();
+
+        const processFile = async (filePath) => {
+            if (processedFiles.has(filePath)) {
+                return;
+            }
+
             try {
-                const content = readFileSync(filePath, 'utf-8');
+                let content = readFileSync(filePath, 'utf-8');
                 const relativePath = relative(this.basePath, filePath);
 
-                this.cssContent.set(relativePath, content);
+                content = await this.processCSSImports(content, dirname(filePath));
 
-                // Определяем к какому компоненту относится CSS
+                this.cssContent.set(relativePath, content);
+                processedFiles.add(filePath);
+
                 const componentName = this.extractComponentName(relativePath);
                 if (componentName) {
                     if (!this.componentCSSMap.has(componentName)) {
@@ -61,10 +110,53 @@ class CSSBundler {
                     }
                     this.componentCSSMap.get(componentName).push(relativePath);
                 }
+
+                console.log(`  📄 Processed CSS: ${relativePath}`);
             } catch (error) {
-                console.warn(`⚠️ Cannot read CSS file ${filePath}:`, error.message);
+                console.warn(`⚠️ Cannot process CSS file ${filePath}:`, error.message);
+            }
+        };
+
+        for (const filePath of cssFiles) {
+            await processFile(filePath);
+        }
+    }
+
+    // Обрабатывает импорты в CSS файлах
+    async processCSSImports(content, baseDir) {
+        const importRegex = /@import\s+(?:url\()?['"]([^'"]+\.css)['"]\)?/g;
+        let processedContent = content;
+        let match;
+
+        while ((match = importRegex.exec(content)) !== null) {
+            const importPath = match[0];
+            const importFile = match[1];
+            let resolvedPath;
+
+            if (importFile.startsWith('./') || importFile.startsWith('../')) {
+                resolvedPath = join(baseDir, importFile);
+            } else {
+                resolvedPath = join(this.basePath, importFile);
+            }
+
+            try {
+                const resolvedPathNormalized = resolve(resolvedPath);
+                if (existsSync(resolvedPathNormalized)) {
+                    let importContent = readFileSync(resolvedPathNormalized, 'utf-8');
+
+                    importContent = await this.processCSSImports(importContent, dirname(resolvedPathNormalized));
+
+                    processedContent = processedContent.replace(importPath, importContent);
+                    console.log(`    ↳ Inlined import: ${importFile}`);
+                } else {
+                    console.warn(`    ↳ Import not found: ${importFile} (from ${baseDir})`);
+                }
+            } catch (error) {
+                console.warn(`    ↳ Error processing import ${importFile}:`, error.message);
             }
         }
+
+        return processedContent;
     }
 
     // Извлекаем имя компонента из пути к CSS
@@ -83,25 +175,32 @@ class CSSBundler {
             }
         }
 
-        // Если не нашли паттерн, используем имя директории
         const dirName = dirname(cssPath);
-        return basename(dirName);
+        const baseName = basename(dirName);
+
+        if (baseName === 'css' || baseName === 'styles') {
+            const parentDir = dirname(dirName);
+            return basename(parentDir);
+        }
+
+        return baseName;
     }
 
     // Генерируем единый CSS бандл
     generateCSSBundle() {
         let bundle = '/* CSS Bundle - Generated by Bundle Script */\n';
+        bundle += '/* This bundle includes all CSS files and their imports */\n\n';
 
         for (const [filePath, content] of this.cssContent) {
-            bundle += `\n/* ${filePath} */\n`;
+            bundle += `/* === ${filePath} === */\n`;
             bundle += content;
-            bundle += '\n';
+            bundle += '\n\n';
         }
 
         return bundle;
     }
 
-    // Создаем виртуальный модуль для CSS
+    // Создаем виртуальный модуль для CSS с улучшенным API
     createVirtualCSSModule() {
         const cssBundle = this.generateCSSBundle();
         const cssPaths = Array.from(this.cssContent.keys());
@@ -109,33 +208,34 @@ class CSSBundler {
 
         return `
 // Virtual CSS Module - Auto-generated
+// Includes ${cssPaths.length} CSS files for ${Object.keys(componentMap).length} components
+
 const cssContent = ${JSON.stringify(cssBundle)};
 const cssPaths = ${JSON.stringify(cssPaths)};
 const componentCSSMap = ${JSON.stringify(componentMap)};
 
+/**
+ * Get CSS content by exact file path
+ */
 export function getCSSByPath(filePath) {
     const normalizedPath = filePath.replace(/\\\\/g, '/');
-    const entry = cssPaths.find(path => path.replace(/\\\\/g, '/').includes(normalizedPath));
     
-    if (entry) {
-        const startMarker = '/* ' + entry + ' */';
-        const startIndex = cssContent.indexOf(startMarker) + startMarker.length;
-        let endIndex = cssContent.length;
-        
-        for (let i = cssPaths.indexOf(entry) + 1; i < cssPaths.length; i++) {
-            const nextMarker = '/* ' + cssPaths[i] + ' */';
-            const nextIndex = cssContent.indexOf(nextMarker);
-            if (nextIndex !== -1) {
-                endIndex = nextIndex;
-                break;
-            }
-        }
-        
-        return cssContent.substring(startIndex, endIndex).trim();
+    const exactMatch = cssPaths.find(path => path.replace(/\\\\/g, '/') === normalizedPath);
+    if (exactMatch) {
+        return extractCSSForFile(exactMatch);
     }
+    
+    const partialMatch = cssPaths.find(path => path.replace(/\\\\/g, '/').includes(normalizedPath));
+    if (partialMatch) {
+        return extractCSSForFile(partialMatch);
+    }
+    
     return null;
 }
 
+/**
+ * Get CSS for specific component
+ */
 export function getCSSForComponent(componentName) {
     const componentPaths = componentCSSMap[componentName];
     if (!componentPaths) return null;
@@ -143,56 +243,121 @@ export function getCSSForComponent(componentName) {
     return componentPaths.map(path => getCSSByPath(path)).filter(Boolean).join('\\n');
 }
 
+/**
+ * Get all CSS content
+ */
 export function getAllCSS() {
     return cssContent;
 }
 
-export function injectCSS() {
-    if (typeof document !== 'undefined') {
-        const style = document.createElement('style');
-        style.textContent = cssContent;
-        document.head.appendChild(style);
-    }
+/**
+ * Get CSS paths for a component
+ */
+export function getCSSPathsForComponent(componentName) {
+    return componentCSSMap[componentName] || [];
 }
 
-export function getCSSPaths() {
-    return cssPaths;
+/**
+ * Check if CSS path exists
+ */
+export function hasCSSPath(filePath) {
+    const normalizedPath = filePath.replace(/\\\\/g, '/');
+    return cssPaths.some(path => path.replace(/\\\\/g, '/').includes(normalizedPath));
 }
 
+/**
+ * Get multiple CSS files
+ */
 export function getMultipleCSS(paths) {
     return paths.map(path => getCSSByPath(path)).filter(Boolean).join('\\n');
 }
 
-export function getComponentCSSMap() {
-    return componentCSSMap;
+/**
+ * Get all component names
+ */
+export function getComponentNames() {
+    return Object.keys(componentCSSMap);
+}
+
+/**
+ * Inject all CSS into document
+ */
+export function injectCSS() {
+    if (typeof document !== 'undefined') {
+        const style = document.createElement('style');
+        style.textContent = cssContent;
+        style.id = 'virtual-css-bundle';
+        document.head.appendChild(style);
+    }
+}
+
+/**
+ * Extract CSS for specific file
+ */
+function extractCSSForFile(filePath) {
+    const startMarker = '/* === ' + filePath + ' === */';
+    const startIndex = cssContent.indexOf(startMarker);
+    
+    if (startIndex === -1) {
+        const oldMarker = '/* ' + filePath + ' */';
+        const oldStartIndex = cssContent.indexOf(oldMarker);
+        if (oldStartIndex === -1) return null;
+        
+        return extractBetweenMarkers(oldStartIndex, oldMarker);
+    }
+    
+    return extractBetweenMarkers(startIndex, startMarker);
+}
+
+/**
+ * Helper to extract CSS between markers
+ */
+function extractBetweenMarkers(startIndex, marker) {
+    const markerLength = marker.length;
+    const contentStart = startIndex + markerLength;
+    let endIndex = cssContent.length;
+    
+    const nextFileMarkerIndex = cssContent.indexOf('/* === ', contentStart);
+    if (nextFileMarkerIndex !== -1) {
+        endIndex = nextFileMarkerIndex;
+    }
+    
+    const content = cssContent.substring(contentStart, endIndex).trim();
+    return content || null;
 }
 
 export default {
-    injectCSS,
     getCSSByPath,
     getCSSForComponent,
     getAllCSS,
-    getCSSPaths,
+    getCSSPathsForComponent,
+    hasCSSPath,
     getMultipleCSS,
-    getComponentCSSMap
+    getComponentNames,
+    injectCSS,
+    cssPaths,
+    componentCSSMap
 };
 `;
     }
 }
 
 class UniversalBundler {
-    constructor() {
+    constructor(options = {}) {
+        this.srcDir = options.srcDir || resolve(__dirname, '../src');
+        this.distDir = options.distDir || resolve(__dirname, '../bundle');
         this.projectRoot = process.cwd();
-        this.distDir = join(this.projectRoot, 'bundle');
-        this.cssBundler = new CSSBundler(this.projectRoot);
+        this.cssBundler = new CSSBundler(this.srcDir);
     }
 
     async createUniversalBundle(outputFileName = 'bundle', options = {}) {
         console.log('⚡ Creating single bundle with all dependencies...');
+        console.log(`📁 Source directory: ${this.srcDir}`);
+        console.log(`📁 Output directory: ${this.distDir}`);
 
         this.ensureDirectory(this.distDir);
 
-        const entryPoint = join(this.projectRoot, 'src', 'index.ts');
+        const entryPoint = join(this.srcDir, 'index.ts');
 
         if (!existsSync(entryPoint)) {
             console.error('❌ Entry point not found:', entryPoint);
@@ -200,19 +365,16 @@ class UniversalBundler {
         }
 
         console.log(`📁 Entry point: ${entryPoint}`);
-        console.log(`📁 Output directory: ${this.distDir}`);
 
-        // Создаем плагин для виртуального CSS модуля
         let cssPlugin = null;
         if (options.virtualCss) {
             try {
-                const cssFiles = await this.cssBundler.findCSSFiles(this.projectRoot);
-                console.log(`🎨 Found ${cssFiles.length} CSS files`);
+                const cssFiles = await this.cssBundler.findCSSFiles(this.srcDir);
+                console.log(`🎨 Found ${cssFiles.length} CSS files in ${this.srcDir}`);
 
                 if (cssFiles.length > 0) {
                     await this.cssBundler.processCSSFiles(cssFiles);
 
-                    // Создаем плагин для виртуального CSS модуля
                     const self = this;
                     cssPlugin = {
                         name: 'virtual-css',
@@ -237,7 +399,6 @@ class UniversalBundler {
             console.log('🎨 Virtual CSS disabled (use --virtual-css to enable)');
         }
 
-        // Читаем package.json для получения зависимостей
         const packageJsonPath = join(this.projectRoot, 'package.json');
         if (!existsSync(packageJsonPath)) {
             console.error('❌ package.json not found');
@@ -246,12 +407,10 @@ class UniversalBundler {
 
         const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
         const dependencies = Object.keys(packageJson.dependencies || {});
-        const devDependencies = Object.keys(packageJson.devDependencies || {});
 
         console.log(`📦 Found ${dependencies.length} dependencies`);
 
         try {
-            // Создаем единый bundle со всеми зависимостями
             const buildConfig = {
                 entryPoints: [entryPoint],
                 bundle: true,
@@ -273,36 +432,54 @@ class UniversalBundler {
                 supported: {
                     'top-level-await': true
                 },
-                // Включаем все зависимости в bundle
-                external: this.getNodeBuiltIns(),
-                // Разрешаем импорты
-                resolveExtensions: ['.ts', '.js', '.mjs', '.cjs', '.json'],
-                // Добавляем полифилы для Node.js модулей
-                inject: this.createPolyfills()
+                resolveExtensions: ['.ts', '.js', '.mjs', '.cjs', '.json', '.css']
             };
 
-            // Добавляем плагин CSS если есть CSS файлы
             if (cssPlugin) {
                 buildConfig.plugins = [cssPlugin];
+
+                buildConfig.plugins.push({
+                    name: 'css-import-resolver',
+                    setup(build) {
+                        build.onLoad({ filter: /\.css$/ }, async (args) => {
+                            try {
+                                const contents = readFileSync(args.path, 'utf-8');
+
+                                const importRegex = /@import\s+(?:url\()?['"]([^'"]+\.css)['"]\)?/g;
+                                let processedContents = contents;
+                                let match;
+
+                                while ((match = importRegex.exec(contents)) !== null) {
+                                    const importPath = match[0];
+                                    const importFile = match[1];
+                                    processedContents = processedContents.replace(importPath, `/* Import resolved: ${importFile} */`);
+                                }
+
+                                return {
+                                    contents: `export default ${JSON.stringify(processedContents)};`,
+                                    loader: 'js'
+                                };
+                            } catch (error) {
+                                return {
+                                    contents: 'export default "";',
+                                    loader: 'js'
+                                };
+                            }
+                        });
+                    }
+                });
             }
 
             await build(buildConfig);
-            console.log(`   ✅ bundle/${outputFileName}.mjs (Single bundle with all dependencies)`);
-
-            // Создаем HTML файл для примера если указан флаг
-            if (options.outputToExample) {
-                await this.generateExampleHtml(outputFileName, options);
-            }
+            console.log(`   ✅ ${outputFileName}.mjs (Single bundle with all dependencies)`);
 
             console.log('\n✅ Bundle created successfully:');
-            console.log(`   📦 bundle/${outputFileName}.mjs (Single file with all dependencies)`);
+            console.log(`   📦 ${outputFileName}.mjs (Single file with all dependencies)`);
             console.log(`   📊 Includes: ${dependencies.length} dependencies`);
             console.log(`   🎨 CSS: ${options.virtualCss ? 'Virtual CSS module included' : 'No CSS'}`);
 
-            // Генерируем файл с информацией о сборке
             this.generateBuildInfo(outputFileName, dependencies, options);
 
-            // Показываем статистику размера файлов
             this.showFileSizes(outputFileName, options);
 
         } catch (error) {
@@ -311,166 +488,14 @@ class UniversalBundler {
         }
     }
 
-    // Node.js built-in модули (внешние для браузера)
-    getNodeBuiltIns() {
-        return [
-            'fs', 'path', 'os', 'child_process', 'crypto', 'http', 'https',
-            'net', 'dns', 'url', 'util', 'stream', 'buffer', 'events',
-            'module', 'assert', 'querystring', 'zlib', 'tls', 'cluster',
-            'vm', 'perf_hooks', 'readline', 'repl', 'timers', 'string_decoder'
-        ];
-    }
-
-    // Создаем полифилы для Node.js модулей
-    createPolyfills() {
-        const polyfillPath = join(this.distDir, 'polyfills.js');
-
-        const polyfillContent = `
-// Polyfills for Node.js modules in browser
-export const multicastDns = {
-    query: () => {
-        console.warn('⚠️ multicast-dns is not available in browser environment');
-        return { on: () => {}, stop: () => {} };
-    }
-};
-
-export const dgram = {
-    createSocket: () => ({
-        bind: () => console.warn('⚠️ dgram is not available in browser'),
-        send: () => console.warn('⚠️ dgram is not available in browser'),
-        close: () => console.warn('⚠️ dgram is not available in browser')
-    })
-};
-
-export const promClient = {
-    Registry: class {
-        metrics() { return ''; }
-        registerMetric() {}
-        getMetricsAsJSON() { return []; }
-    },
-    Counter: class {
-        inc() {}
-    },
-    Gauge: class {
-        set() {}
-        inc() {}
-        dec() {}
-    },
-    Histogram: class {
-        observe() {}
-    }
-};
-
-export const streamToSocket = {
-    createStream: () => ({
-        pipe: () => {},
-        on: () => {},
-        write: () => {}
-    })
-};
-
-export const WebSocket = {
-    Server: class {
-        constructor() {
-            console.warn('⚠️ WebSocket.Server is not available in browser');
-        }
-    }
-};
-
-export const browserPolyfills = {
-    'multicast-dns': multicastDns,
-    'dgram': dgram,
-    'prom-client': promClient,
-    'stream-to-socket': streamToSocket,
-    'ws': { Server: WebSocket.Server }
-};
-
-export default browserPolyfills;
-`;
-
-        writeFileSync(polyfillPath, polyfillContent, 'utf8');
-
-        // Возвращаем пути для инъекции
-        return [
-            polyfillPath
-        ];
-    }
-
-    async generateExampleHtml(outputFileName, options) {
-        const exampleDir = join(this.projectRoot, 'example');
-        this.ensureDirectory(exampleDir);
-
-        const htmlContent = `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${outputFileName} - Example</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 40px; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        h1 { color: #333; }
-        .components { display: flex; flex-wrap: wrap; gap: 20px; margin-top: 30px; }
-        .component { border: 1px solid #ddd; padding: 20px; border-radius: 8px; min-width: 300px; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>${outputFileName} - Browser Example</h1>
-        <p>This example demonstrates the bundled application with all dependencies included in a single file.</p>
-        
-        <div class="components">
-            <div class="component">
-                <h3>Libp2p Node</h3>
-                <libp2p-node
-                    id="libp2p-node-1"
-                    title="Browser Node"
-                    data-auto-start="false">
-                </libp2p-node>
-            </div>
-            
-            <div class="component">
-                <h3>DHT Manager</h3>
-                <dht-manager 
-                    id="dht-manager-1"
-                    title="DHT Manager"
-                    data-auto-refresh="true">
-                </dht-manager>
-            </div>
-            
-            <div class="component">
-                <h3>Node Identity</h3>
-                <node-identity
-                    id="node-identity-1"
-                    title="Node Identity"
-                    data-auto-refresh="true">
-                </node-identity>
-            </div>
-            
-            <div class="component">
-                <h3>Peers Manager</h3>
-                <peers-manager
-                    id="peers-manager-1"
-                    title="Peers Manager"
-                    data-auto-refresh="true">
-                </peers-manager>
-            </div>
-        </div>
-    </div>
-    
-    <script type="module" src="../bundle/${outputFileName}.mjs"></script>
-</body>
-</html>`;
-
-        const htmlPath = join(exampleDir, 'index.html');
-        writeFileSync(htmlPath, htmlContent, 'utf8');
-        console.log(`   📄 example/index.html (Example HTML file)`);
-    }
-
     generateBuildInfo(outputFileName, dependencies, options) {
         const buildInfo = {
             name: outputFileName,
             timestamp: new Date().toISOString(),
+            paths: {
+                source: this.srcDir,
+                output: this.distDir
+            },
             output: {
                 file: `${outputFileName}.mjs`,
                 format: 'esm',
@@ -490,8 +515,7 @@ export default browserPolyfills;
                 totalDependencies: dependencies.length,
                 cssFiles: this.cssBundler.cssContent.size,
                 virtualCss: options.virtualCss
-            },
-            external: this.getNodeBuiltIns()
+            }
         };
 
         writeFileSync(
@@ -499,7 +523,7 @@ export default browserPolyfills;
             JSON.stringify(buildInfo, null, 2)
         );
 
-        console.log(`   📄 bundle/${outputFileName}.info.json (Build info)`);
+        console.log(`   📄 ${outputFileName}.info.json (Build info)`);
     }
 
     showFileSizes(outputFileName, options) {
@@ -535,15 +559,56 @@ export default browserPolyfills;
     }
 }
 
-// Добавим функцию basename для использования
 function basename(path) {
     return path.split('/').pop().split('\\').pop();
+}
+
+/**
+ * Проверяет CSS файлы на наличие импортов
+ */
+function checkCSSImports() {
+    const srcDir = resolve(__dirname, '../src');
+    const cssFiles = [];
+
+    const scanDir = (dir) => {
+        const items = readdirSync(dir, { withFileTypes: true });
+        for (const item of items) {
+            const fullPath = join(dir, item.name);
+            if (item.isDirectory() && !item.name.includes('node_modules')) {
+                scanDir(fullPath);
+            } else if (item.isFile() && extname(item.name) === '.css') {
+                cssFiles.push(fullPath);
+            }
+        }
+    };
+
+    scanDir(srcDir);
+
+    console.log('\n🔍 Checking CSS imports:');
+    for (const cssFile of cssFiles) {
+        try {
+            const content = readFileSync(cssFile, 'utf-8');
+            const importRegex = /@import\s+(?:url\()?['"]([^'"]+\.css)['"]\)?/g;
+            const imports = content.match(importRegex);
+
+            if (imports) {
+                console.log(`  ${relative(srcDir, cssFile)} has imports:`);
+                imports.forEach(imp => console.log(`    → ${imp}`));
+            }
+        } catch (error) {
+            console.warn(`  ⚠️ Error reading ${cssFile}:`, error.message);
+        }
+    }
 }
 
 // CLI обработчик
 async function main() {
     const args = process.argv.slice(2);
     let outputFileName = 'bundle';
+
+    let srcDir = resolve(__dirname, '../src');
+    let distDir = resolve(__dirname, '../bundle');
+
     const options = {
         onlyMjs: false,
         virtualCss: false,
@@ -572,6 +637,14 @@ async function main() {
                 outputFileName = args[++i] || 'bundle';
                 break;
 
+            case '--src':
+                srcDir = resolve(args[++i] || '../src');
+                break;
+
+            case '--dist':
+                distDir = resolve(args[++i] || '../bundle');
+                break;
+
             case '--only-mjs':
             case '--esm-only':
                 options.onlyMjs = true;
@@ -589,6 +662,10 @@ async function main() {
                 options.outputToExample = true;
                 break;
 
+            case '--check-css':
+                checkCSSImports();
+                process.exit(0);
+
             default:
                 if (!arg.startsWith('-')) {
                     outputFileName = arg.replace(/\.[^/.]+$/, '');
@@ -598,6 +675,8 @@ async function main() {
     }
 
     console.log(`🎯 Generating ${options.platform} bundle (Single file)`);
+    console.log(`📁 Source: ${srcDir}`);
+    console.log(`📁 Destination: ${distDir}`);
 
     if (options.virtualCss) {
         console.log('🎨 Virtual CSS enabled');
@@ -607,7 +686,11 @@ async function main() {
         console.log('📁 Example HTML will be generated');
     }
 
-    const bundler = new UniversalBundler();
+    const bundler = new UniversalBundler({
+        srcDir,
+        distDir
+    });
+
     await bundler.createUniversalBundle(outputFileName, options);
 }
 
@@ -622,6 +705,8 @@ function showHelp() {
 
 ОПЦИИ:
   -h, --help           Показать эту справку
+  --src <path>         Путь к исходным файлам (по умолчанию: ../src)
+  --dist <path>        Путь для выходных файлов (по умолчанию: ../bundle)
   -o, --output <name>  Имя выходного файла (без расширения)
   -n, --name <name>    Альтернативное указание имени
   --only-mjs           Создать только ESM бандл (.mjs)
@@ -629,39 +714,45 @@ function showHelp() {
   --virtual-css        Включить поддержку virtual:css модуля
   --browser-only       Собрать только для браузера (по умолчанию)
   --example            Создать HTML файл примера
+  --check-css          Проверить CSS импорты перед сборкой
 
 ПРИМЕРЫ:
-  # Сборка для браузера со всеми зависимостями
+  # Сборка с путями по умолчанию
   node scripts/bundle.js
-
-  # Сборка с virtual:css
-  node scripts/bundle.js --virtual-css
-
+  
+  # Сборка с указанием путей
+  node scripts/bundle.js --src ../src --dist ../bundle
+  
+  # Сборка с virtual:css и проверкой импортов
+  node scripts/bundle.js --virtual-css --src ./src --dist ./dist --check-css
+  
   # Сборка с указанием имени файла
-  node scripts/bundle.js my-app
-  node scripts/bundle.js --output my-library
-
+  node scripts/bundle.js --output my-app --src ../my-src --dist ../my-dist
+  
   # Создание примера HTML
   node scripts/bundle.js --example -o example-app
 
 СОЗДАВАЕМЫЕ ФАЙЛЫ:
-  • bundle/<name>.mjs          - Единый файл сборки со всеми зависимостями
-  • bundle/<name>.info.json    - Информация о сборке
+  • <dist>/<name>.mjs          - Единый файл сборки со всеми зависимостями
+  • <dist>/<name>.info.json    - Информация о сборке
   • example/index.html         - Пример HTML файл (с флагом --example)
 
 ОСОБЕННОСТИ:
   • Все зависимости включены в один файл
   • Tree shaking и минификация
   • Source maps для отладки
-  • Виртуальный модуль CSS (virtual:css) по флагy --virtual-css
+  • Виртуальный модуль CSS (virtual:css) по флагу --virtual-css
   • Поддержка top-level await для современного JavaScript
   • Полифилы для Node.js модулей в браузере
   • Поддержка только ESM формата для браузера
+  • Гибкие пути для исходников и выходных файлов
+  • Автоматическая обработка CSS импортов (@import)
 
 ВКЛЮЧАЕТ:
   • Все зависимости из package.json
   • Все компоненты проекта
   • CSS через virtual:css модуль (если включен)
+  • CSS импорты автоматически разрешаются
   • Полифилы для Node.js API
     `.trim());
 }
