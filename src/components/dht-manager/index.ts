@@ -911,6 +911,8 @@ export class DHTManager extends BaseComponent {
         await this.updateDHTDisplay();
     }
 
+    timerId: ReturnType<typeof setTimeout> | null = null;
+
     async updateDHTDisplay(data?: any): Promise<void> {
         try {
             if (data?.stats) {
@@ -919,13 +921,19 @@ export class DHTManager extends BaseComponent {
                 state.dhtStatsUpdated = true;
             }
 
-            console.log('@@@@@@@@@@ renderPart @@@@@@@@@@ 8')
-            console.trace()
-            await this.renderPart({
-                partName: 'renderDHTStats',
-                state: this.state,
-                selector: '#dhtStatsContainer'
-            });
+            if (this.timerId) {
+                clearTimeout(this.timerId);
+                this.timerId = null;
+            }
+
+            this.timerId = setTimeout(async () => {
+                console.log('@@@@@@@@@@ renderPart @@@@@@@@@@ 8')
+                await this.renderPart({
+                    partName: 'renderDHTStats',
+                    state: this.state,
+                    selector: '#dhtStatsContainer'
+                });
+            }, 2000)
         } catch (renderError) {
             console.error('❌ Render error in updateDHTDisplay:', renderError);
         }
