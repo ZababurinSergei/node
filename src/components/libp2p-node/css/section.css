@@ -1,0 +1,451 @@
+/* Node Identity Section - Matching DHT Manager Style */
+
+.libp2p-node .identity-main {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.libp2p-node .identity-main::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    opacity: 0.8;
+}
+
+.libp2p-node .identity-main:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+    border-color: rgba(102, 126, 234, 0.3);
+    transition: var(--transition);
+}
+
+.libp2p-node .identity-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    transition: var(--transition);
+}
+
+.libp2p-node .identity-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.libp2p-node .identity-item:first-child {
+    padding-top: 0;
+}
+
+.libp2p-node .identity-item:hover {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 6px;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-left: -10px;
+    margin-right: -10px;
+}
+
+.libp2p-node .identity-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--cosmic-text-secondary, #cbd5e1);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 120px;
+}
+
+.libp2p-node .identity-label::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 8px rgba(102, 126, 234, 0.5);
+}
+
+.libp2p-node .identity-value-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    justify-content: flex-end;
+}
+
+.libp2p-node .identity-value {
+    font-family: 'Courier New', 'Consolas', monospace;
+    font-size: 0.9rem;
+    color: var(--cosmic-text-primary, #f1f5f9);
+    word-break: break-all;
+    text-align: right;
+    font-weight: 500;
+}
+
+.libp2p-node .identity-value.peer-id {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 0.85rem;
+    line-height: 1.4;
+    max-width: 400px;
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: thin;
+}
+
+.libp2p-node .identity-value.peer-id::-webkit-scrollbar {
+    height: 4px;
+}
+
+.libp2p-node .identity-value.peer-id::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 2px;
+}
+
+.libp2p-node .identity-value.peer-id::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 2px;
+}
+
+/* Status Indicator - Enhanced like DHT Manager */
+.libp2p-node .identity-item .starting {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px;
+    position: relative;
+    animation: status-pulse 2s infinite;
+}
+
+.libp2p-node .identity-item .starting::after {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    right: -3px;
+    bottom: -3px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.3;
+    animation: status-glow 2s infinite;
+}
+
+@keyframes status-pulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+}
+
+@keyframes status-glow {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.3;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 0.1;
+    }
+}
+
+/* Status Colors */
+.libp2p-node .identity-item .starting.running {
+    background: #10b981;
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+    color: #10b981;
+}
+
+.libp2p-node .identity-item .starting.stopped {
+    background: #ef4444;
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+    color: #ef4444;
+}
+
+.libp2p-node .identity-item .starting.starting {
+    background: #f59e0b;
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+    color: #f59e0b;
+}
+
+.libp2p-node .identity-item .starting.error {
+    background: #dc2626;
+    box-shadow: 0 0 10px rgba(220, 38, 38, 0.5);
+    color: #dc2626;
+}
+
+.libp2p-node .node-status {
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 4px 10px;
+    border-radius: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    min-width: 80px;
+    text-align: center;
+}
+
+/* Copy Button - Matching DHT Manager style */
+.libp2p-node .btn-copy {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+}
+
+.libp2p-node .btn-copy:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(79, 172, 254, 0.4);
+    background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+}
+
+.libp2p-node .btn-copy:active {
+    transform: translateY(0);
+}
+
+.libp2p-node .btn-copy:focus-visible {
+    outline: 2px solid #4facfe;
+    outline-offset: 2px;
+}
+
+/* Connection Count Styling */
+.libp2p-node .identity-item:nth-child(3) .identity-value {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #667eea;
+    background: rgba(102, 126, 234, 0.1);
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(102, 126, 234, 0.3);
+    min-width: 40px;
+    text-align: center;
+}
+
+/* Multiaddrs Count Styling */
+.libp2p-node .identity-item:nth-child(4) .identity-value {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #00b09b;
+    background: rgba(0, 176, 155, 0.1);
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(0, 176, 155, 0.3);
+    min-width: 40px;
+    text-align: center;
+}
+
+/* Section Header */
+.libp2p-node .identity-main::after {
+    content: 'Node Identity';
+    position: absolute;
+    top: -10px;
+    left: 20px;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #667eea;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 1px solid rgba(102, 126, 234, 0.3);
+    backdrop-filter: blur(10px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .libp2p-node .identity-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        padding: 1rem 0;
+    }
+
+    .libp2p-node .identity-label {
+        min-width: auto;
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .libp2p-node .identity-value-container {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .libp2p-node .identity-value {
+        text-align: left;
+    }
+
+    .libp2p-node .identity-value.peer-id {
+        max-width: 100%;
+        font-size: 0.8rem;
+    }
+
+    .libp2p-node .btn-copy {
+        position: absolute;
+        top: 50%;
+        right: 0;
+        transform: translateY(-50%);
+    }
+}
+
+@media (max-width: 480px) {
+    .libp2p-node .identity-main {
+        padding: 1rem;
+    }
+
+    .libp2p-node .identity-label {
+        font-size: 0.85rem;
+    }
+
+    .libp2p-node .identity-value {
+        font-size: 0.85rem;
+    }
+
+    .libp2p-node .identity-value.peer-id {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.6rem;
+    }
+}
+
+/* Light Theme Support */
+@media (prefers-color-scheme: light) {
+    .libp2p-node .identity-main {
+        background: rgba(0, 0, 0, 0.05);
+        border-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .libp2p-node .identity-main::before {
+        background: linear-gradient(90deg, #667eea, #764ba2);
+    }
+
+    .libp2p-node .identity-item {
+        border-bottom-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .libp2p-node .identity-item:hover {
+        background: rgba(0, 0, 0, 0.03);
+    }
+
+    .libp2p-node .identity-label {
+        color: #475569;
+    }
+
+    .libp2p-node .identity-value {
+        color: #1e293b;
+    }
+
+    .libp2p-node .identity-value.peer-id {
+        background: rgba(0, 0, 0, 0.03);
+        border-color: rgba(0, 0, 0, 0.08);
+        color: #1e293b;
+    }
+
+    .libp2p-node .node-status {
+        background: rgba(0, 0, 0, 0.05);
+        border-color: rgba(0, 0, 0, 0.1);
+        color: #1e293b;
+    }
+
+    .libp2p-node .identity-item:nth-child(3) .identity-value {
+        background: rgba(102, 126, 234, 0.05);
+        border-color: rgba(102, 126, 234, 0.2);
+        color: #667eea;
+    }
+
+    .libp2p-node .identity-item:nth-child(4) .identity-value {
+        background: rgba(0, 176, 155, 0.05);
+        border-color: rgba(0, 176, 155, 0.2);
+        color: #00b09b;
+    }
+
+    .libp2p-node .identity-main::after {
+        background: rgba(0, 0, 0, 0.05);
+        border-color: rgba(0, 0, 0, 0.1);
+        color: #667eea;
+    }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    .libp2p-node .identity-main {
+        border: 2px solid #667eea;
+    }
+
+    .libp2p-node .identity-item {
+        border-bottom: 2px solid #667eea;
+    }
+
+    .libp2p-node .identity-value.peer-id {
+        border: 2px solid #667eea;
+    }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    .libp2p-node .identity-main:hover {
+        transform: none;
+    }
+
+    .libp2p-node .identity-item:hover {
+        transform: none;
+        padding-left: 0;
+        padding-right: 0;
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    .libp2p-node .btn-copy:hover {
+        transform: none;
+    }
+
+    .libp2p-node .identity-item .starting {
+        animation: none;
+    }
+
+    .libp2p-node .identity-item .starting::after {
+        animation: none;
+    }
+
+    @keyframes status-pulse {
+        0%, 100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    @keyframes status-glow {
+        0%, 100% {
+            transform: scale(1);
+            opacity: 0.3;
+        }
+    }
+}

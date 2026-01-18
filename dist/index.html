@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Libp2p Browser Node & DHT Manager</title>
+    <link href="./index.css" rel="stylesheet"/>
+
+    <script type="importmap">
+{
+  "imports": {
+    "@chainsafe/libp2p-gossipsub": "./vendor.bundle.mjs",
+    "@chainsafe/libp2p-gossipsub/*": "./vendor.bundle.mjs",
+    "@chainsafe/libp2p-noise": "./vendor.bundle.mjs",
+    "@chainsafe/libp2p-noise/*": "./vendor.bundle.mjs",
+    "@chainsafe/libp2p-yamux": "./vendor.bundle.mjs",
+    "@chainsafe/libp2p-yamux/*": "./vendor.bundle.mjs",
+    "@libp2p/bootstrap": "./vendor.bundle.mjs",
+    "@libp2p/bootstrap/*": "./vendor.bundle.mjs",
+    "@libp2p/circuit-relay-v2": "./vendor.bundle.mjs",
+    "@libp2p/circuit-relay-v2/*": "./vendor.bundle.mjs",
+    "@libp2p/crypto": "./vendor.bundle.mjs",
+    "@libp2p/crypto/*": "./vendor.bundle.mjs",
+    "@libp2p/dcutr": "./vendor.bundle.mjs",
+    "@libp2p/dcutr/*": "./vendor.bundle.mjs",
+    "@libp2p/floodsub": "./vendor.bundle.mjs",
+    "@libp2p/floodsub/*": "./vendor.bundle.mjs",
+    "@libp2p/http": "./vendor.bundle.mjs",
+    "@libp2p/http/*": "./vendor.bundle.mjs",
+    "@libp2p/http-fetch": "./vendor.bundle.mjs",
+    "@libp2p/http-fetch/*": "./vendor.bundle.mjs",
+    "@libp2p/http-ping": "./vendor.bundle.mjs",
+    "@libp2p/http-ping/*": "./vendor.bundle.mjs",
+    "@libp2p/identify": "./vendor.bundle.mjs",
+    "@libp2p/identify/*": "./vendor.bundle.mjs",
+    "@libp2p/interface": "./vendor.bundle.mjs",
+    "@libp2p/interface/*": "./vendor.bundle.mjs",
+    "@libp2p/interface-transport": "./vendor.bundle.mjs",
+    "@libp2p/interface-transport/*": "./vendor.bundle.mjs",
+    "@libp2p/kad-dht": "./vendor.bundle.mjs",
+    "@libp2p/kad-dht/*": "./vendor.bundle.mjs",
+    "@libp2p/logger": "./vendor.bundle.mjs",
+    "@libp2p/logger/*": "./vendor.bundle.mjs",
+    "@libp2p/peer-id": "./vendor.bundle.mjs",
+    "@libp2p/peer-id/*": "./vendor.bundle.mjs",
+    "@libp2p/peer-store": "./vendor.bundle.mjs",
+    "@libp2p/peer-store/*": "./vendor.bundle.mjs",
+    "@libp2p/ping": "./vendor.bundle.mjs",
+    "@libp2p/ping/*": "./vendor.bundle.mjs",
+    "@libp2p/pubsub-peer-discovery": "./vendor.bundle.mjs",
+    "@libp2p/pubsub-peer-discovery/*": "./vendor.bundle.mjs",
+    "@libp2p/utils": "./vendor.bundle.mjs",
+    "@libp2p/utils/*": "./vendor.bundle.mjs",
+    "@libp2p/webrtc": "./vendor.bundle.mjs",
+    "@libp2p/webrtc/*": "./vendor.bundle.mjs",
+    "@libp2p/websockets": "./vendor.bundle.mjs",
+    "@libp2p/websockets/*": "./vendor.bundle.mjs",
+    "@libp2p/webtransport": "./vendor.bundle.mjs",
+    "@libp2p/webtransport/*": "./vendor.bundle.mjs",
+    "@multiformats/multiaddr": "./vendor.bundle.mjs",
+    "@multiformats/multiaddr/*": "./vendor.bundle.mjs",
+    "@multiformats/multiaddr-matcher": "./vendor.bundle.mjs",
+    "@multiformats/multiaddr-matcher/*": "./vendor.bundle.mjs",
+    "blockstore-core": "./vendor.bundle.mjs",
+    "blockstore-core/*": "./vendor.bundle.mjs",
+    "datastore-core": "./vendor.bundle.mjs",
+    "datastore-core/*": "./vendor.bundle.mjs",
+    "datastore-idb": "./vendor.bundle.mjs",
+    "datastore-idb/*": "./vendor.bundle.mjs",
+    "libp2p": "./vendor.bundle.mjs",
+    "libp2p/*": "./vendor.bundle.mjs",
+    "protons-runtime": "./vendor.bundle.mjs",
+    "protons-runtime/*": "./vendor.bundle.mjs",
+    "reflect-metadata": "./vendor.bundle.mjs",
+    "reflect-metadata/*": "./vendor.bundle.mjs",
+    "virtual:css": "./virtual-css.mjs"
+  },
+  "scopes": {
+    "./": {
+      "@chainsafe/libp2p-gossipsub": "./vendor.bundle.mjs",
+      "@chainsafe/libp2p-gossipsub/*": "./vendor.bundle.mjs",
+      "@chainsafe/libp2p-noise": "./vendor.bundle.mjs",
+      "@chainsafe/libp2p-noise/*": "./vendor.bundle.mjs",
+      "@chainsafe/libp2p-yamux": "./vendor.bundle.mjs",
+      "@chainsafe/libp2p-yamux/*": "./vendor.bundle.mjs",
+      "@libp2p/bootstrap": "./vendor.bundle.mjs",
+      "@libp2p/bootstrap/*": "./vendor.bundle.mjs",
+      "@libp2p/circuit-relay-v2": "./vendor.bundle.mjs",
+      "@libp2p/circuit-relay-v2/*": "./vendor.bundle.mjs",
+      "@libp2p/crypto": "./vendor.bundle.mjs",
+      "@libp2p/crypto/*": "./vendor.bundle.mjs",
+      "@libp2p/dcutr": "./vendor.bundle.mjs",
+      "@libp2p/dcutr/*": "./vendor.bundle.mjs",
+      "@libp2p/floodsub": "./vendor.bundle.mjs",
+      "@libp2p/floodsub/*": "./vendor.bundle.mjs",
+      "@libp2p/http": "./vendor.bundle.mjs",
+      "@libp2p/http/*": "./vendor.bundle.mjs",
+      "@libp2p/http-fetch": "./vendor.bundle.mjs",
+      "@libp2p/http-fetch/*": "./vendor.bundle.mjs",
+      "@libp2p/http-ping": "./vendor.bundle.mjs",
+      "@libp2p/http-ping/*": "./vendor.bundle.mjs",
+      "@libp2p/identify": "./vendor.bundle.mjs",
+      "@libp2p/identify/*": "./vendor.bundle.mjs",
+      "@libp2p/interface": "./vendor.bundle.mjs",
+      "@libp2p/interface/*": "./vendor.bundle.mjs",
+      "@libp2p/interface-transport": "./vendor.bundle.mjs",
+      "@libp2p/interface-transport/*": "./vendor.bundle.mjs",
+      "@libp2p/kad-dht": "./vendor.bundle.mjs",
+      "@libp2p/kad-dht/*": "./vendor.bundle.mjs",
+      "@libp2p/logger": "./vendor.bundle.mjs",
+      "@libp2p/logger/*": "./vendor.bundle.mjs",
+      "@libp2p/peer-id": "./vendor.bundle.mjs",
+      "@libp2p/peer-id/*": "./vendor.bundle.mjs",
+      "@libp2p/peer-store": "./vendor.bundle.mjs",
+      "@libp2p/peer-store/*": "./vendor.bundle.mjs",
+      "@libp2p/ping": "./vendor.bundle.mjs",
+      "@libp2p/ping/*": "./vendor.bundle.mjs",
+      "@libp2p/pubsub-peer-discovery": "./vendor.bundle.mjs",
+      "@libp2p/pubsub-peer-discovery/*": "./vendor.bundle.mjs",
+      "@libp2p/utils": "./vendor.bundle.mjs",
+      "@libp2p/utils/*": "./vendor.bundle.mjs",
+      "@libp2p/webrtc": "./vendor.bundle.mjs",
+      "@libp2p/webrtc/*": "./vendor.bundle.mjs",
+      "@libp2p/websockets": "./vendor.bundle.mjs",
+      "@libp2p/websockets/*": "./vendor.bundle.mjs",
+      "@libp2p/webtransport": "./vendor.bundle.mjs",
+      "@libp2p/webtransport/*": "./vendor.bundle.mjs",
+      "@multiformats/multiaddr": "./vendor.bundle.mjs",
+      "@multiformats/multiaddr/*": "./vendor.bundle.mjs",
+      "@multiformats/multiaddr-matcher": "./vendor.bundle.mjs",
+      "@multiformats/multiaddr-matcher/*": "./vendor.bundle.mjs",
+      "blockstore-core": "./vendor.bundle.mjs",
+      "blockstore-core/*": "./vendor.bundle.mjs",
+      "datastore-core": "./vendor.bundle.mjs",
+      "datastore-core/*": "./vendor.bundle.mjs",
+      "datastore-idb": "./vendor.bundle.mjs",
+      "datastore-idb/*": "./vendor.bundle.mjs",
+      "libp2p": "./vendor.bundle.mjs",
+      "libp2p/*": "./vendor.bundle.mjs",
+      "protons-runtime": "./vendor.bundle.mjs",
+      "protons-runtime/*": "./vendor.bundle.mjs",
+      "reflect-metadata": "./vendor.bundle.mjs",
+      "reflect-metadata/*": "./vendor.bundle.mjs",
+      "virtual:css": "./virtual-css.mjs"
+    }
+  }
+}
+</script>
+</head>
+<body>
+<button class="theme-toggle" onclick="toggleTheme()" id="themeToggle">
+    <span id="themeIcon">🌙</span>
+</button>
+
+<h1>Libp2p Browser Node & DHT Manager</h1>
+
+<div class="components-container">
+    <div class="component-wrapper">
+        <libp2p-node
+            id="libp2p-node-1"
+            title="Libp2p Browser Node"
+            data-auto-start="false"
+        >
+        </libp2p-node>
+    </div>
+    <div class="dashboard">
+        <node-identity
+                id="node-identity-1"
+                title="Browser Node"
+                data-auto-refresh="true"
+                data-refresh-interval="30000"
+                data-show-details="true">
+        </node-identity>
+        <network-addresses id="network-addresses-1"
+                           title="Network Addresses"
+                           data-auto-refresh="false"
+                           data-refresh-interval="30000"
+                           data-source="auto"
+                           data-show-stats="true">
+        </network-addresses>
+        <bootstrap-address id="bootstrap-address-1"
+                           title="Bootstrap Addresses"
+                           data-auto-refresh="true"
+                           data-refresh-interval="20000"
+                           data-source="auto"
+                           data-default-source="all">
+        </bootstrap-address>
+    </div>
+    <div class="component-wrapper">
+        <dht-manager id="dht-manager-1"
+                     title="DHT Manager"
+                     data-auto-refresh="false"
+                     data-default-type="all">
+        </dht-manager>
+    </div>
+    <div class="component-wrapper">
+        <peers-manager id="peers-manager-1"
+                       title="Peers Manager"
+                       data-auto-refresh="true"
+                       data-refresh-interval="15000">
+        </peers-manager>
+    </div>
+</div>
+<script type="module" src="./index.js"></script>
+<script>
+    function toggleTheme() {
+        const html = document.documentElement;
+        const currentTheme = html.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+        html.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+
+        const themeIcon = document.getElementById('themeIcon');
+        themeIcon.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+    }
+
+    // Load saved theme
+    document.addEventListener('DOMContentLoaded', () => {
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        const themeIcon = document.getElementById('themeIcon');
+        themeIcon.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+    });
+
+    // Export functions for testing
+    window.toggleTheme = toggleTheme;
+
+    // Функции для взаимодействия с компонентами
+    window.getLibp2pNode = () => document.querySelector('libp2p-node#libp2p-node-1');
+    window.getDHTManager = () => document.querySelector('dht-manager#dht-manager-1');
+
+    // Global functions for external control
+    window.refreshDHTStats = async () => {
+        const dhtManager = document.querySelector('dht-manager#dht-manager-1');
+        if (dhtManager) {
+            return await dhtManager.postMessage({ type: 'REFRESH_STATS' });
+        }
+        return { success: false, error: 'DHT Manager not found' };
+    };
+
+    window.getDHTStats = async () => {
+        const dhtManager = document.querySelector('dht-manager#dht-manager-1');
+        if (dhtManager) {
+            return await dhtManager.postMessage({ type: 'GET_STATS' });
+        }
+        return { success: false, error: 'DHT Manager not found' };
+    };
+
+    window.switchDHTType = async (type) => {
+        const dhtManager = document.querySelector('dht-manager#dht-manager-1');
+        if (dhtManager) {
+            return await dhtManager.postMessage({
+                type: 'SWITCH_TYPE',
+                data: { type }
+            });
+        }
+        return { success: false, error: 'DHT Manager not found' };
+    };
+
+    window.findPeer = async (peerId, dhtType = 'all') => {
+        const dhtManager = document.querySelector('dht-manager#dht-manager-1');
+        if (dhtManager) {
+            return await dhtManager.postMessage({
+                type: 'FIND_PEER',
+                data: { peerId, dhtType }
+            });
+        }
+        return { success: false, error: 'DHT Manager not found' };
+    };
+
+    window.findProviders = async (cid, dhtType = 'all', maxProviders = 20) => {
+        const dhtManager = document.querySelector('dht-manager#dht-manager-1');
+        if (dhtManager) {
+            return await dhtManager.postMessage({
+                type: 'FIND_PROVIDERS',
+                data: { cid, dhtType, maxProviders }
+            });
+        }
+        return { success: false, error: 'DHT Manager not found' };
+    };
+
+    window.provideContent = async (cid, dhtType = 'all') => {
+        const dhtManager = document.querySelector('dht-manager#dht-manager-1');
+        if (dhtManager) {
+            return await dhtManager.postMessage({
+                type: 'PROVIDE_CONTENT',
+                data: { cid, dhtType }
+            });
+        }
+        return { success: false, error: 'DHT Manager not found' };
+    };
+
+    window.getDHTBuckets = async (dhtType = 'lan') => {
+        const dhtManager = document.querySelector('dht-manager#dht-manager-1');
+        if (dhtManager) {
+            return await dhtManager.postMessage({
+                type: 'GET_BUCKETS',
+                data: { type: dhtType }
+            });
+        }
+        return { success: false, error: 'DHT Manager not found' };
+    };
+
+    // Event dispatchers for external control
+    window.dispatchDHTEvent = (eventType, data = {}) => {
+        const event = new CustomEvent(`dht:${eventType}`, { detail: data });
+        window.dispatchEvent(event);
+    };
+
+    // New functions for Bootstrap Address component
+    window.refreshBootstrapAddresses = async () => {
+        const bootstrapAddress = document.querySelector('bootstrap-address#bootstrap-address-1');
+        if (bootstrapAddress) {
+            return await bootstrapAddress.postMessage({ type: 'REFRESH_ADDRESSES' });
+        }
+        return { success: false, error: 'Bootstrap Address component not found' };
+    };
+
+    window.getBootstrapAddressStats = async () => {
+        const bootstrapAddress = document.querySelector('bootstrap-address#bootstrap-address-1');
+        if (bootstrapAddress) {
+            return await bootstrapAddress.postMessage({ type: 'GET_STATS' });
+        }
+        return { success: false, error: 'Bootstrap Address component not found' };
+    };
+
+    window.syncBootstrapWithLibp2p = async () => {
+        const bootstrapAddress = document.querySelector('bootstrap-address#bootstrap-address-1');
+        if (bootstrapAddress) {
+            return await bootstrapAddress.postMessage({ type: 'SYNC_WITH_LIBP2P' });
+        }
+        return { success: false, error: 'Bootstrap Address component not found' };
+    };
+
+    window.switchBootstrapSource = async (source) => {
+        const bootstrapAddress = document.querySelector('bootstrap-address#bootstrap-address-1');
+        if (bootstrapAddress) {
+            bootstrapAddress.setAttribute('data-source', source);
+            return { success: true, source };
+        }
+        return { success: false, error: 'Bootstrap Address component not found' };
+    };
+</script>
+</body>
+</html>

@@ -1,0 +1,623 @@
+@import url('./scroll.css');
+@import url('./modal.css');
+
+:root {
+    --danger: red;
+    --primary: #4e54c8;
+    --primary-dark: #3f43a5;
+    --secondary: #8f94fb;
+    --accent: #00d4ff;
+    --surface: #ffffff;
+    --surface-100: #f8fafc;
+    --surface-200: #e2e8f0;
+    --text: #2d3748;
+    --text-secondary: #718096;
+    --border: #e2e8f0;
+    --border-dark: #cbd5e1;
+    --background: #f7fafc;
+    --font-main: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+    --transition: all 0.2s ease;
+    --radius: 8px;
+    --radius-lg: 12px;
+    --space: 8px;
+    --space-sm: 4px;
+    --space-lg: 16px;
+    --space-xl: 24px;
+    --space-xxl: 32px;
+
+    /* Цвета статусов */
+    --status-running: #10b981;
+    --status-stopped: #ef4444;
+    --status-starting: #f59e0b;
+    --status-error: #dc2626;
+
+    /* Цвета кнопок */
+    --btn-primary: #4e54c8;
+    --btn-primary-hover: #3f43a5;
+    --btn-secondary: #6b7280;
+    --btn-secondary-hover: #4b5563;
+    --btn-info: #0ea5e9;
+    --btn-info-hover: #0284c7;
+    --btn-warning: #f59e0b;
+    --btn-warning-hover: #d97706;
+
+    --cosmic-primary: black;
+}
+
+[data-theme="dark"] {
+    --primary: #6366f1;
+    --primary-dark: #4f46e5;
+    --secondary: #818cf8;
+    --accent: #22d3ee;
+    --surface: #1e293b;
+    --surface-100: #334155;
+    --surface-200: #475569;
+    --text: #f1f5f9;
+    --text-secondary: #cbd5e1;
+    --border: #334155;
+    --border-dark: #475569;
+    --background: #0f172a;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.3);
+
+    /* Цвета статусов для темной темы */
+    --status-running: #10b981;
+    --status-stopped: #ef4444;
+    --status-starting: #f59e0b;
+    --status-error: #dc2626;
+
+    /* Цвета кнопок для темной темы */
+    --btn-primary: #6366f1;
+    --btn-primary-hover: #4f46e5;
+    --btn-secondary: #6b7280;
+    --btn-secondary-hover: #4b5563;
+    --btn-info: #0ea5e9;
+    --btn-info-hover: #0284c7;
+    --btn-warning: #f59e0b;
+    --btn-warning-hover: #d97706;
+
+    --cosmic-primary: black;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: var(--background);
+    min-height: 100vh;
+    padding: var(--space-xl);
+    font-family: var(--font-main);
+    color: var(--text);
+    transition: var(--transition);
+    line-height: 1.6;
+}
+
+.theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: var(--transition);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.theme-toggle:hover {
+    transform: scale(1.1);
+    box-shadow: var(--shadow-lg);
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: var(--space-xxl);
+    color: var(--text);
+    font-size: 2.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.components-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.component-wrapper {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    box-shadow: var(--shadow-lg);
+    transition: var(--transition);
+}
+
+.component-wrapper:hover {
+    box-shadow: 0 20px 25px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    .components-container {
+        grid-template-columns: 1fr;
+    }
+
+    body {
+        padding: var(--space-lg);
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    .component-wrapper {
+        padding: var(--space-lg);
+    }
+}
+
+/* Стили для libp2p-node компонента */
+.libp2p-node {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xl);
+}
+
+.libp2p-node .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: var(--space-lg);
+    border-bottom: 2px solid var(--border);
+}
+
+.libp2p-node .title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text);
+    margin: 0;
+}
+
+.libp2p-node .status-indicator {
+    display: flex;
+    align-items: center;
+    gap: var(--space);
+    background: var(--surface-100);
+    padding: var(--space) var(--space-lg);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+}
+
+.libp2p-node .status-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.libp2p-node .status {
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.libp2p-node .status-running {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--status-running);
+}
+
+.libp2p-node .status-stopped {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--status-stopped);
+}
+
+.libp2p-node .status-starting {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: var(--status-starting);
+}
+
+.libp2p-node .status-error {
+    background-color: rgba(220, 38, 38, 0.1);
+    color: var(--status-error);
+}
+
+.libp2p-node .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-lg);
+}
+
+.libp2p-node .stat-card {
+    background: var(--surface-100);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: var(--space-lg);
+    transition: var(--transition);
+}
+
+.libp2p-node .stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+    border-color: var(--primary);
+}
+
+.libp2p-node .stat-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: var(--space);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.libp2p-node .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text);
+    font-family: 'Courier New', monospace;
+    word-break: break-all;
+}
+
+.libp2p-node .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space);
+    padding: var(--space-lg);
+    background: var(--surface-100);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+}
+
+.libp2p-node .btn {
+    display: flex;
+    align-items: center;
+    gap: var(--space);
+    padding: 10px 20px;
+    border: none;
+    border-radius: var(--radius);
+    font-weight: 500;
+    font-size: 14px;
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: var(--font-main);
+    min-width: 140px;
+    justify-content: center;
+}
+
+.libp2p-node .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.libp2p-node .btn-primary {
+    background: linear-gradient(135deg, var(--btn-primary), var(--primary-dark));
+    color: white;
+}
+
+.libp2p-node .btn-primary:hover {
+    background: linear-gradient(135deg, var(--btn-primary-hover), var(--primary-dark));
+}
+
+.libp2p-node .btn-secondary {
+    background: linear-gradient(135deg, var(--btn-secondary), var(--btn-secondary-hover));
+    color: white;
+}
+
+.libp2p-node .btn-secondary:hover {
+    background: linear-gradient(135deg, var(--btn-secondary-hover), var(--btn-secondary-hover));
+}
+
+.libp2p-node .btn-info {
+    background: linear-gradient(135deg, var(--btn-info), var(--btn-info-hover));
+    color: white;
+}
+
+.libp2p-node .btn-info:hover {
+    background: linear-gradient(135deg, var(--btn-info-hover), var(--btn-info-hover));
+}
+
+.libp2p-node .btn-warning {
+    background: linear-gradient(135deg, var(--btn-warning), var(--btn-warning-hover));
+    color: white;
+}
+
+.libp2p-node .btn-warning:hover {
+    background: linear-gradient(135deg, var(--btn-warning-hover), var(--btn-warning-hover));
+}
+
+.libp2p-node .btn-icon {
+    font-size: 1.1em;
+}
+
+.libp2p-node .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.libp2p-node .multiaddrs-section,
+.libp2p-node .logs-section,
+.libp2p-node .dht-stats {
+    background: var(--surface-100);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: var(--space-lg);
+}
+
+.libp2p-node h3 {
+    font-size: 1.2rem;
+    margin-bottom: var(--space-lg);
+    color: var(--text);
+    padding-bottom: var(--space);
+    border-bottom: 1px solid var(--border);
+}
+
+.libp2p-node .multiaddrs-list {
+    max-height: 200px;
+    overflow-y: auto;
+    padding: var(--space);
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+}
+
+.libp2p-node .multiaddr-item {
+    padding: var(--space);
+    margin-bottom: var(--space);
+    background: var(--surface-100);
+    border-radius: 4px;
+    border-left: 3px solid var(--primary);
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    word-break: break-all;
+}
+
+.libp2p-node .multiaddr-item:last-child {
+    margin-bottom: 0;
+}
+
+.libp2p-node .empty-state {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: var(--space-xl);
+    font-style: italic;
+}
+
+.libp2p-node .logs-container {
+    max-height: 300px;
+    overflow-y: auto;
+    padding: var(--space);
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+}
+
+.libp2p-node .log-entry {
+    padding: 8px 12px;
+    margin-bottom: 4px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    display: flex;
+    gap: var(--space);
+    align-items: flex-start;
+}
+
+.libp2p-node .log-entry:last-child {
+    margin-bottom: 0;
+}
+
+.libp2p-node .log-info {
+    background: rgba(59, 130, 246, 0.1);
+    border-left: 3px solid #3b82f6;
+}
+
+.libp2p-node .log-warn {
+    background: rgba(245, 158, 11, 0.1);
+    border-left: 3px solid #f59e0b;
+}
+
+.libp2p-node .log-error {
+    background: rgba(239, 68, 68, 0.1);
+    border-left: 3px solid #ef4444;
+}
+
+.libp2p-node .log-time {
+    color: var(--text-secondary);
+    min-width: 70px;
+}
+
+.libp2p-node .log-message {
+    flex: 1;
+    color: var(--text);
+}
+
+.libp2p-node .empty-logs {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: var(--space-xl);
+    font-style: italic;
+}
+
+.libp2p-node .dht-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--space);
+}
+
+.libp2p-node .dht-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: var(--space);
+    text-align: center;
+    transition: var(--transition);
+}
+
+.libp2p-node .dht-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+    border-color: var(--primary);
+}
+
+.libp2p-node .dht-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+    font-weight: 600;
+}
+
+.libp2p-node .dht-value {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+    text-transform: capitalize;
+}
+
+.libp2p-node .dht-peers {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+/* Анимации */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.libp2p-node .stat-card,
+.libp2p-node .multiaddr-item,
+.libp2p-node .log-entry,
+.libp2p-node .dht-card {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .libp2p-node .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .libp2p-node .controls {
+        flex-direction: column;
+    }
+
+    .libp2p-node .btn {
+        width: 100%;
+    }
+
+    .libp2p-node .dht-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .libp2p-node .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .libp2p-node .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space);
+    }
+}
+
+/* Состояния фокуса для доступности */
+.libp2p-node button:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+/* Уменьшение движения */
+@media (prefers-reduced-motion: reduce) {
+    .libp2p-node,
+    .libp2p-node .stat-card,
+    .libp2p-node .multiaddr-item,
+    .libp2p-node .log-entry,
+    .libp2p-node .dht-card,
+    .libp2p-node .btn {
+        transition: none;
+        animation: none;
+    }
+
+    .libp2p-node .stat-card:hover,
+    .libp2p-node .multiaddr-item:hover,
+    .libp2p-node .dht-card:hover,
+    .libp2p-node .btn:hover {
+        transform: none;
+    }
+
+    .component-wrapper:hover {
+        transform: none;
+    }
+}
+
+/* Стили для скелетона */
+.skeleton-container * {
+    pointer-events: none !important;
+    user-select: none !important;
+}
+
+.skeleton-container :not(style, script, link, meta) {
+    color: transparent !important;
+    background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%) !important;
+    background-size: 200% 100% !important;
+    animation: skeleton-loading 1.5s infinite !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+}
+
+@keyframes skeleton-loading {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+[data-theme="dark"] .skeleton-container :not(style, script, link, meta) {
+    background: linear-gradient(90deg, #2d3748 25%, #4a5568 50%, #2d3748 75%) !important;
+}
+
+.dashboard {
+    display: grid;
+    grid-template-columns: 18dvw 1fr 1fr 1fr;
+    gap: 20px;
+    margin: 20px 0;
+}
+
+network-addresses {
+    grid-column: 2 / span 3;
+    grid-row: 1;
+}
+
+bootstrap-address {
+    grid-column: 2 / span 3;
+    grid-row: 2;
+}
