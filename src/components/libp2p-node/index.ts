@@ -63,7 +63,7 @@ export class Libp2pNode extends BaseComponent {
             connectionsTemplate: template.renderConnectionsPart
         };
         this.state = {
-            title: 'Libp2p Browser Node',
+            title: 'Станция',
             peerId: null,
             status: 'stopped',
             connections: 0,
@@ -392,7 +392,7 @@ export class Libp2pNode extends BaseComponent {
     // Публичные методы для взаимодействия с libp2p
     public async startLibp2pNode(): Promise<boolean> {
         try {
-            this.addLog('Starting libp2p browser node...', 'info');
+            this.addLog('Станция запушена...', 'info');
             const state = this.state as Libp2pNodeState;
             state.status = 'starting';
             await this.updateStatusUI();
@@ -497,7 +497,7 @@ export class Libp2pNode extends BaseComponent {
             await this.updateMultiaddrsUI();
             // await this.updateConnectionsUI();
 
-            this.addLog('Libp2p browser node started successfully', 'info');
+            this.addLog('Станция started successfully', 'info');
             this.addLog(`Peer ID: ${state.peerId}`, 'info');
             this.addLog(`Listening on ${state.multiaddrs.length} addresses`, 'info');
 
@@ -701,7 +701,7 @@ export class Libp2pNode extends BaseComponent {
             enableDHT: this.getAttribute('data-enable-dht') !== 'false',
             enablePubSub: this.getAttribute('data-enable-pubsub') !== 'false',
             enableRelay: this.getAttribute('data-enable-relay') !== 'false',
-            title: this.getAttribute('title') || 'Libp2p Browser Node'
+            title: this.getAttribute('title') || 'Станция'
         };
     }
 

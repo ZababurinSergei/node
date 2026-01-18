@@ -57670,7 +57670,7 @@ async function createLibp2pNode(options = {}) {
 
 // src/components/libp2p-node/template/index.ts
 function defaultTemplate({ state = {} }) {
-  const { title = "Libp2p Browser Node", status = "stopped", peerId = "", connections = 0, multiaddrs = [] } = state;
+  const { title = "Станция", status = "stopped", peerId = "", connections = 0, multiaddrs = [] } = state;
   const isRunning = status === "running";
   const isStopped = status === "stopped";
   const isLoading = status === "starting" || status === "stopping";
@@ -58805,7 +58805,7 @@ var Libp2pNode = class extends BaseComponent {
       connectionsTemplate: renderConnectionsPart
     };
     this.state = {
-      title: "Libp2p Browser Node",
+      title: "Станция",
       peerId: null,
       status: "stopped",
       connections: 0,
@@ -59089,7 +59089,7 @@ var Libp2pNode = class extends BaseComponent {
   // Публичные методы для взаимодействия с libp2p
   async startLibp2pNode() {
     try {
-      this.addLog("Starting libp2p browser node...", "info");
+      this.addLog("Станция запушена...", "info");
       const state = this.state;
       state.status = "starting";
       await this.updateStatusUI();
@@ -59165,7 +59165,7 @@ var Libp2pNode = class extends BaseComponent {
       }
       await this.updateStatusUI();
       await this.updateMultiaddrsUI();
-      this.addLog("Libp2p browser node started successfully", "info");
+      this.addLog("Станция started successfully", "info");
       this.addLog(`Peer ID: ${state.peerId}`, "info");
       this.addLog(`Listening on ${state.multiaddrs.length} addresses`, "info");
       this.startAutoDiscovery();
@@ -59310,7 +59310,7 @@ var Libp2pNode = class extends BaseComponent {
       enableDHT: this.getAttribute("data-enable-dht") !== "false",
       enablePubSub: this.getAttribute("data-enable-pubsub") !== "false",
       enableRelay: this.getAttribute("data-enable-relay") !== "false",
-      title: this.getAttribute("title") || "Libp2p Browser Node"
+      title: this.getAttribute("title") || "Станция"
     };
   }
   async applyConfig(config) {
@@ -66423,7 +66423,7 @@ var appInit = async () => {
       id: "node-identity-1",
       slot: "main",
       attributes: {
-        title: "Browser Node",
+        title: "Станция",
         "data-auto-refresh": "true",
         "data-refresh-interval": "30000",
         "data-show-details": "true"
@@ -66433,7 +66433,7 @@ var appInit = async () => {
       id: "libp2p-node-1",
       slot: "main",
       attributes: {
-        title: "Libp2p Browser Node",
+        title: "Станция",
         "data-auto-start": "false"
       }
     }, {

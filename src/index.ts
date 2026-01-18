@@ -69,14 +69,14 @@ const appInit = async (): Promise<any> => {
     if (isModuleFederation) {
         const componentConfigs: ComponentConfig[] = [{
             component: 'node-identity', id: 'node-identity-1', slot: 'main', attributes: {
-                title: 'Browser Node',
+                title: 'Станция',
                 'data-auto-refresh': 'true',
                 'data-refresh-interval': '30000',
                 'data-show-details': 'true'
             }
         }, {
             component: 'libp2p-node', id: 'libp2p-node-1', slot: 'main', attributes: {
-                title: 'Libp2p Browser Node', 'data-auto-start': 'false'
+                title: 'Станция', 'data-auto-start': 'false'
             }
         }, {
             component: 'dht-manager', id: 'dht-manager-1', slot: 'main', attributes: {

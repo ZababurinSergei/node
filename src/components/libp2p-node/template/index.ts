@@ -3,7 +3,7 @@
  */
 export function defaultTemplate({ state = {} }: { state: any; context: any }): string {
     // @ts-ignore
-    const { title = 'Libp2p Browser Node', status = 'stopped', peerId = '', connections = 0, multiaddrs = [] } = state;
+    const { title = 'Станция', status = 'stopped', peerId = '', connections = 0, multiaddrs = [] } = state;
 
     const isRunning = status === 'running';
     const isStopped = status === 'stopped';

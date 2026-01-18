@@ -1,6 +1,6 @@
 // src/components/libp2p-node/template/index.ts
 function defaultTemplate({ state = {} }) {
-  const { title = "Libp2p Browser Node", status = "stopped", peerId = "", connections = 0, multiaddrs = [] } = state;
+  const { title = "Станция", status = "stopped", peerId = "", connections = 0, multiaddrs = [] } = state;
   const isRunning = status === "running";
   const isStopped = status === "stopped";
   const isLoading = status === "starting" || status === "stopping";

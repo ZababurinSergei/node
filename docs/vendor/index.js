@@ -1,6 +1,6 @@
 // Vendor Index - Auto-generated
 // External dependencies for the project
-// Generated: 2026-01-18T16:01:04.531Z
+// Generated: 2026-01-18T16:47:32.590Z
 // Project: /home/sergei/Рабочий стол/in-progress/libp2p-browser/packages/node
 // Platform: browser
 
@@ -38,7 +38,7 @@ export * from 'protons-runtime';
 export * from 'reflect-metadata';
 
 export const VENDOR_INFO = {
-  generatedAt: '2026-01-18T16:01:04.531Z',
+  generatedAt: '2026-01-18T16:47:32.590Z',
   dependencies: ["@chainsafe/libp2p-gossipsub","@chainsafe/libp2p-noise","@chainsafe/libp2p-yamux","@libp2p/bootstrap","@libp2p/circuit-relay-v2","@libp2p/crypto","@libp2p/dcutr","@libp2p/floodsub","@libp2p/http","@libp2p/http-fetch","@libp2p/http-ping","@libp2p/identify","@libp2p/interface","@libp2p/interface-transport","@libp2p/kad-dht","@libp2p/logger","@libp2p/peer-id","@libp2p/peer-store","@libp2p/ping","@libp2p/pubsub-peer-discovery","@libp2p/utils","@libp2p/webrtc","@libp2p/websockets","@libp2p/webtransport","@multiformats/multiaddr","@multiformats/multiaddr-matcher","blockstore-core","datastore-core","datastore-idb","libp2p","protons-runtime","reflect-metadata"],
   totalDependencies: 32,
   buildType: 'vendor-bundle',
