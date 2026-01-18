@@ -118,19 +118,20 @@ export const controller = async (context: DHTManager) => {
 
         const routingTable = dhtInstance.routingTable;
 
-        let timerId: number | null = null
+        let timerId: ReturnType<typeof setTimeout> | null = null;
         // Событие при добавлении пира
         routingTable.addEventListener('peer:add', (event: any) => {
-            if(timerId) {
-                clearTimeout(timerId)
+            if (timerId) {
+                clearTimeout(timerId);
+                timerId = null;
             }
+
             timerId = setTimeout(() => {
                 console.log(`----- 🎯 [${dhtType}] peer:add`, event.detail);
                 (context as any).refreshData(dhtType as any).catch((e: any) => {
                     console.error(`Error refreshing ${dhtType} DHT:`, e);
                 });
-            }, 2000)
-
+            }, 5000)
         });
 
         // Событие при удалении пира
