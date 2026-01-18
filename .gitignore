@@ -39,6 +39,9 @@ declaration
 **/declaration
 **/bundle
 /bundle
+/dist
+./dist
+**/dist
 ./_sandbox
 ./_sandbox_1
 **/index.bundle.mjs/**
