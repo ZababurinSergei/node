@@ -142,7 +142,7 @@ export const controller = (context: NetworkAddresses) => {
                 // Ctrl+R для обновления
                 if (keyboardEvent.ctrlKey && keyboardEvent.key === 'r') {
                     e.preventDefault();
-                    (context as any)._actions.refreshAddresses();
+                    // (context as any)._actions.refreshAddresses();
                 }
 
                 // Ctrl+Alt+S для синхронизации с libp2p
@@ -162,7 +162,7 @@ export const controller = (context: NetworkAddresses) => {
 
             // Внешние события
             addEventListener(window, 'network-addresses:refresh', () => {
-                (context as any)._actions.refreshAddresses();
+                // (context as any)._actions.refreshAddresses();
             });
 
             addEventListener(window, 'network-addresses:sync', () => {
@@ -185,9 +185,9 @@ export const controller = (context: NetworkAddresses) => {
             // Обновление при видимости страницы
             addEventListener(document, 'visibilitychange', () => {
                 if (!document.hidden) {
-                    setTimeout(() => {
-                        (context as any)._actions.refreshAddresses();
-                    }, 1000);
+                    // setTimeout(() => {
+                        // (context as any)._actions.refreshAddresses();
+                    // }, 1000);
                 }
             });
         },
