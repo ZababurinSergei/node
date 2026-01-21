@@ -951,25 +951,24 @@ export class NetworkAddresses extends BaseComponent {
     //     return false;
     // }
 
-    // public async copyAddress(address: string): Promise<void> {
-    //     try {
-    //         await navigator.clipboard.writeText(address);
-    //
-    //         await this.showModal({
-    //             title: 'Copied',
-    //             content: 'Address copied to clipboard',
-    //             buttons: [{ text: 'OK', type: 'primary' }]
-    //         });
-    //
-    //         this.addLog(`Address copied: ${address}`, 'info');
-    //     } catch (error) {
-    //         await this.showModal({
-    //             title: 'Copy Failed',
-    //             content: 'Failed to copy address to clipboard',
-    //             buttons: [{ text: 'OK', type: 'primary' }]
-    //         });
-    //     }
-    // }
+    public async copyAddress(target: any, address: string): Promise<void> {
+        try {
+            await navigator.clipboard.writeText(address);
+
+            // Показываем визуальную обратную связь
+            const button = target;
+            const originalText = button.innerHTML;
+            button.innerHTML = '✓ Скопировано';
+            button.style.background = 'var(--success, #10b981)';
+
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.style.background = '';
+            }, 2000);
+        } catch (error) {
+            console.error('Ошибка копирования адреса:', error);
+        }
+    }
 
     // public async refreshAddresses(): Promise<void> {
     //     const state = this.state as NetworkAddressesState;

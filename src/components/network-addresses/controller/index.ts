@@ -124,7 +124,7 @@ export const controller = (context: NetworkAddresses) => {
                     const addressElement = target.closest('.address-value');
                     const address = addressElement?.textContent?.trim();
                     if (address) {
-                        await (context as any)._actions.copyAddress(address);
+                        await (context as any).copyAddress(addressElement, address);
                     }
                 }
             });
