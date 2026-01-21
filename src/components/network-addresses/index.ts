@@ -124,7 +124,7 @@ export class NetworkAddresses extends BaseComponent {
 
         await this.fullRender(this.state);
 
-        const autoRefresh = this.getAttribute('data-auto-refresh') !== 'false';
+        // const autoRefresh = this.getAttribute('data-auto-refresh') !== 'false';
         // if (autoRefresh) {
         //     debugger
         //     this.startAutoRefresh();
@@ -861,222 +861,222 @@ export class NetworkAddresses extends BaseComponent {
         }
     }
 
-    public async addAddress(address: string): Promise<boolean> {
-        if (!this.validateAddress(address)) {
-            await this.showModal({
-                title: 'Invalid Address',
-                content: 'The provided address has an invalid format',
-                buttons: [{ text: 'OK', type: 'primary' }]
-            });
-            return false;
-        }
+    // public async addAddress(address: string): Promise<boolean> {
+    //     if (!this.validateAddress(address)) {
+    //         await this.showModal({
+    //             title: 'Invalid Address',
+    //             content: 'The provided address has an invalid format',
+    //             buttons: [{ text: 'OK', type: 'primary' }]
+    //         });
+    //         return false;
+    //     }
+    //
+    //     const state = this.state as NetworkAddressesState;
+    //
+    //     if (state.addresses.includes(address)) {
+    //         await this.showModal({
+    //             title: 'Duplicate Address',
+    //             content: 'This address already exists in the list',
+    //             buttons: [{ text: 'OK', type: 'primary' }]
+    //         });
+    //         return false;
+    //     }
+    //
+    //     state.addresses.push(address);
+    //     state.totalAddresses++;
+    //     state.lastUpdated = Date.now();
+    //
+    //     this.updateAddressStats([address]);
+    //
+    //     await this.renderPart({
+    //         partName: 'renderAddressesList',
+    //         state: state,
+    //         selector: '#addressesList'
+    //     });
+    //
+    //     // await this.updateElement({
+    //     //     selector: '.card-badge',
+    //     //     value: state.totalAddresses.toString(),
+    //     //     property: 'textContent'
+    //     // });
+    //
+    //     this.addLog(`Address added: ${address}`, 'info');
+    //     return true;
+    // }
+    //
+    // public async removeAddress(address: string): Promise<boolean> {
+    //     const state = this.state as NetworkAddressesState;
+    //
+    //     // Используем другой подход для показа модального окна
+    //     const shouldRemove = await this.showModal({
+    //         title: 'Remove Address',
+    //         content: `Are you sure you want to remove the address: ${address}?`,
+    //         buttons: [
+    //             { text: 'Cancel', type: 'secondary' },
+    //             {
+    //                 text: 'Remove',
+    //                 type: 'danger',
+    //                 action: async () => {
+    //                     return true;
+    //                 }
+    //             }
+    //         ]
+    //     });
+    //
+    //     // showModal возвращает undefined при нажатии Cancel
+    //     if (shouldRemove === undefined) return false;
+    //
+    //     const index = state.addresses.indexOf(address);
+    //     if (index > -1) {
+    //         state.addresses.splice(index, 1);
+    //         state.totalAddresses--;
+    //         state.lastUpdated = Date.now();
+    //
+    //         await this.renderPart({
+    //             partName: 'renderAddressesList',
+    //             state: state,
+    //             selector: '#addressesList'
+    //         });
+    //
+    //         await this.updateElement({
+    //             selector: '.card-badge',
+    //             value: state.totalAddresses.toString(),
+    //             property: 'textContent'
+    //         });
+    //
+    //         this.addLog(`Address removed: ${address}`, 'info');
+    //         return true;
+    //     }
+    //
+    //     return false;
+    // }
 
-        const state = this.state as NetworkAddressesState;
+    // public async copyAddress(address: string): Promise<void> {
+    //     try {
+    //         await navigator.clipboard.writeText(address);
+    //
+    //         await this.showModal({
+    //             title: 'Copied',
+    //             content: 'Address copied to clipboard',
+    //             buttons: [{ text: 'OK', type: 'primary' }]
+    //         });
+    //
+    //         this.addLog(`Address copied: ${address}`, 'info');
+    //     } catch (error) {
+    //         await this.showModal({
+    //             title: 'Copy Failed',
+    //             content: 'Failed to copy address to clipboard',
+    //             buttons: [{ text: 'OK', type: 'primary' }]
+    //         });
+    //     }
+    // }
 
-        if (state.addresses.includes(address)) {
-            await this.showModal({
-                title: 'Duplicate Address',
-                content: 'This address already exists in the list',
-                buttons: [{ text: 'OK', type: 'primary' }]
-            });
-            return false;
-        }
+    // public async refreshAddresses(): Promise<void> {
+    //     const state = this.state as NetworkAddressesState;
+    //     state.isLoading = true;
+    //
+    //     // await this.updateElement({
+    //     //     selector: '.btn-refresh',
+    //     //     value: true,
+    //     //     property: 'disabled'
+    //     // });
+    //
+    //     // await this.updateElement({
+    //     //     selector: '.btn-refresh .btn-text',
+    //     //     value: 'Refreshing...',
+    //     //     property: 'textContent'
+    //     // });
+    //
+    //     try {
+    //         // const source = this.getAttribute('data-source') || 'auto';
+    //         // await this.loadAddressesFromSource(source);
+    //     } catch (error) {
+    //         this.addError({
+    //             componentName: this.constructor.name,
+    //             source: 'refreshAddresses',
+    //             message: 'Failed to refresh addresses',
+    //             details: error
+    //         });
+    //     } finally {
+    //         state.isLoading = false;
+    //
+    //         // await this.updateElement({
+    //         //     selector: '.btn-refresh',
+    //         //     value: false,
+    //         //     property: 'disabled'
+    //         // });
+    //         // await this.updateElement({
+    //         //     selector: '.btn-refresh .btn-text',
+    //         //     value: 'Refresh',
+    //         //     property: 'textContent'
+    //         // });
+    //     }
+    // }
 
-        state.addresses.push(address);
-        state.totalAddresses++;
-        state.lastUpdated = Date.now();
+    // public async exportAddresses(): Promise<any> {
+    //     const state = this.state as NetworkAddressesState;
+    //
+    //     const exportData = {
+    //         addresses: state.addresses,
+    //         exportTime: new Date().toISOString(),
+    //         totalAddresses: state.totalAddresses,
+    //         stats: state.addressStats,
+    //         connectionInfo: state.connectionInfo,
+    //         networkMetrics: state.networkMetrics,
+    //         component: 'Network Addresses',
+    //         nodeInfo: {
+    //             timestamp: Date.now()
+    //         }
+    //     };
+    //
+    //     return exportData;
+    // }
 
-        this.updateAddressStats([address]);
-
-        await this.renderPart({
-            partName: 'renderAddressesList',
-            state: state,
-            selector: '#addressesList'
-        });
-
-        // await this.updateElement({
-        //     selector: '.card-badge',
-        //     value: state.totalAddresses.toString(),
-        //     property: 'textContent'
-        // });
-
-        this.addLog(`Address added: ${address}`, 'info');
-        return true;
-    }
-
-    public async removeAddress(address: string): Promise<boolean> {
-        const state = this.state as NetworkAddressesState;
-
-        // Используем другой подход для показа модального окна
-        const shouldRemove = await this.showModal({
-            title: 'Remove Address',
-            content: `Are you sure you want to remove the address: ${address}?`,
-            buttons: [
-                { text: 'Cancel', type: 'secondary' },
-                {
-                    text: 'Remove',
-                    type: 'danger',
-                    action: async () => {
-                        return true;
-                    }
-                }
-            ]
-        });
-
-        // showModal возвращает undefined при нажатии Cancel
-        if (shouldRemove === undefined) return false;
-
-        const index = state.addresses.indexOf(address);
-        if (index > -1) {
-            state.addresses.splice(index, 1);
-            state.totalAddresses--;
-            state.lastUpdated = Date.now();
-
-            await this.renderPart({
-                partName: 'renderAddressesList',
-                state: state,
-                selector: '#addressesList'
-            });
-
-            await this.updateElement({
-                selector: '.card-badge',
-                value: state.totalAddresses.toString(),
-                property: 'textContent'
-            });
-
-            this.addLog(`Address removed: ${address}`, 'info');
-            return true;
-        }
-
-        return false;
-    }
-
-    public async copyAddress(address: string): Promise<void> {
-        try {
-            await navigator.clipboard.writeText(address);
-
-            await this.showModal({
-                title: 'Copied',
-                content: 'Address copied to clipboard',
-                buttons: [{ text: 'OK', type: 'primary' }]
-            });
-
-            this.addLog(`Address copied: ${address}`, 'info');
-        } catch (error) {
-            await this.showModal({
-                title: 'Copy Failed',
-                content: 'Failed to copy address to clipboard',
-                buttons: [{ text: 'OK', type: 'primary' }]
-            });
-        }
-    }
-
-    public async refreshAddresses(): Promise<void> {
-        const state = this.state as NetworkAddressesState;
-        state.isLoading = true;
-
-        // await this.updateElement({
-        //     selector: '.btn-refresh',
-        //     value: true,
-        //     property: 'disabled'
-        // });
-
-        // await this.updateElement({
-        //     selector: '.btn-refresh .btn-text',
-        //     value: 'Refreshing...',
-        //     property: 'textContent'
-        // });
-
-        try {
-            // const source = this.getAttribute('data-source') || 'auto';
-            // await this.loadAddressesFromSource(source);
-        } catch (error) {
-            this.addError({
-                componentName: this.constructor.name,
-                source: 'refreshAddresses',
-                message: 'Failed to refresh addresses',
-                details: error
-            });
-        } finally {
-            state.isLoading = false;
-
-            // await this.updateElement({
-            //     selector: '.btn-refresh',
-            //     value: false,
-            //     property: 'disabled'
-            // });
-            // await this.updateElement({
-            //     selector: '.btn-refresh .btn-text',
-            //     value: 'Refresh',
-            //     property: 'textContent'
-            // });
-        }
-    }
-
-    public async exportAddresses(): Promise<any> {
-        const state = this.state as NetworkAddressesState;
-
-        const exportData = {
-            addresses: state.addresses,
-            exportTime: new Date().toISOString(),
-            totalAddresses: state.totalAddresses,
-            stats: state.addressStats,
-            connectionInfo: state.connectionInfo,
-            networkMetrics: state.networkMetrics,
-            component: 'Network Addresses',
-            nodeInfo: {
-                timestamp: Date.now()
-            }
-        };
-
-        return exportData;
-    }
-
-    public async testConnection(address: string): Promise<any> {
-        this.addLog(`Testing connection to: ${address}`, 'info');
-
-        try {
-            const latency = Math.floor(Math.random() * 100) + 50;
-            const success = Math.random() > 0.2;
-
-            await new Promise(resolve => setTimeout(resolve, 1000));
-
-            if (success) {
-                await this.showModal({
-                    title: 'Connection Test Successful',
-                    content: `
-                        <div style="padding: 1rem 0;">
-                            <p><strong>Address:</strong> ${address}</p>
-                            <p><strong>Latency:</strong> ${latency}ms</p>
-                            <p><strong>Status:</strong> ✅ Connected</p>
-                        </div>
-                    `,
-                    buttons: [{ text: 'OK', type: 'primary' }]
-                });
-                return { success: true, latency, address };
-            } else {
-                await this.showModal({
-                    title: 'Connection Test Failed',
-                    content: `
-                        <div style="padding: 1rem 0;">
-                            <p><strong>Address:</strong> ${address}</p>
-                            <p><strong>Status:</strong> ❌ Connection failed</p>
-                            <p><strong>Error:</strong> Timeout or network issue</p>
-                        </div>
-                    `,
-                    buttons: [{ text: 'OK', type: 'primary' }]
-                });
-                return { success: false, error: 'Connection failed', address };
-            }
-        } catch (error) {
-            await this.showModal({
-                title: 'Test Error',
-                content: `Failed to test connection: ${error}`,
-                buttons: [{ text: 'OK', type: 'primary' }]
-            });
-            return { success: false, error: (error as Error).message, address };
-        }
-    }
+    // public async testConnection(address: string): Promise<any> {
+    //     this.addLog(`Testing connection to: ${address}`, 'info');
+    //
+    //     try {
+    //         const latency = Math.floor(Math.random() * 100) + 50;
+    //         const success = Math.random() > 0.2;
+    //
+    //         await new Promise(resolve => setTimeout(resolve, 1000));
+    //
+    //         if (success) {
+    //             await this.showModal({
+    //                 title: 'Connection Test Successful',
+    //                 content: `
+    //                     <div style="padding: 1rem 0;">
+    //                         <p><strong>Address:</strong> ${address}</p>
+    //                         <p><strong>Latency:</strong> ${latency}ms</p>
+    //                         <p><strong>Status:</strong> ✅ Connected</p>
+    //                     </div>
+    //                 `,
+    //                 buttons: [{ text: 'OK', type: 'primary' }]
+    //             });
+    //             return { success: true, latency, address };
+    //         } else {
+    //             await this.showModal({
+    //                 title: 'Connection Test Failed',
+    //                 content: `
+    //                     <div style="padding: 1rem 0;">
+    //                         <p><strong>Address:</strong> ${address}</p>
+    //                         <p><strong>Status:</strong> ❌ Connection failed</p>
+    //                         <p><strong>Error:</strong> Timeout or network issue</p>
+    //                     </div>
+    //                 `,
+    //                 buttons: [{ text: 'OK', type: 'primary' }]
+    //             });
+    //             return { success: false, error: 'Connection failed', address };
+    //         }
+    //     } catch (error) {
+    //         await this.showModal({
+    //             title: 'Test Error',
+    //             content: `Failed to test connection: ${error}`,
+    //             buttons: [{ text: 'OK', type: 'primary' }]
+    //         });
+    //         return { success: false, error: (error as Error).message, address };
+    //     }
+    // }
 
     private updateAddressStats(addresses: string[]): void {
         const state = this.state as NetworkAddressesState;
@@ -1129,21 +1129,21 @@ export class NetworkAddresses extends BaseComponent {
     //     }
     // }
 
-    private startAutoRefresh(): void {
-        this.stopAutoRefresh();
-
-        const interval = parseInt(this.getAttribute('data-refresh-interval') || '30000', 10);
-
-        this.refreshInterval = window.setInterval(async () => {
-            try {
-                await this.refreshAddresses();
-            } catch (error) {
-                console.error('Error in auto refresh:', error);
-            }
-        }, interval);
-
-        this.addLog(`Auto refresh started with interval: ${interval}ms`, 'info');
-    }
+    // private startAutoRefresh(): void {
+    //     this.stopAutoRefresh();
+    //
+    //     const interval = parseInt(this.getAttribute('data-refresh-interval') || '30000', 10);
+    //
+    //     this.refreshInterval = window.setInterval(async () => {
+    //         try {
+    //             await this.refreshAddresses();
+    //         } catch (error) {
+    //             console.error('Error in auto refresh:', error);
+    //         }
+    //     }, interval);
+    //
+    //     this.addLog(`Auto refresh started with interval: ${interval}ms`, 'info');
+    // }
 
     private stopAutoRefresh(): void {
         if (this.refreshInterval) {
@@ -1162,9 +1162,9 @@ export class NetworkAddresses extends BaseComponent {
         return validProtocols.some(protocol => address.includes(protocol));
     }
 
-    public getState(): NetworkAddressesState {
-        return this.state as NetworkAddressesState;
-    }
+    // public getState(): NetworkAddressesState {
+    //     return this.state as NetworkAddressesState;
+    // }
 
     public addLog(message: string, level: 'info' | 'warn' | 'error' = 'info'): void {
         const timestamp = new Date().toLocaleTimeString();

@@ -197,6 +197,7 @@ export async function createLibp2pNode(options: Libp2pBrowserOptions = {}): Prom
 
         // @ts-ignore
         libp2p.addEventListener('transport:close', async (event) => {
+            console.log('!!!!!!!!!!!! transport:close !!!!!!!!!!!!!!!')
             const addresses = libp2p.getMultiaddrs().map(addr => addr.toString());
             await updateAllAddressesInComponent(addresses);
             log(`Transport listening close, адреса обновлены: ${addresses.length}`, 'info');
@@ -205,12 +206,14 @@ export async function createLibp2pNode(options: Libp2pBrowserOptions = {}): Prom
         // @ts-ignore
         libp2p.addEventListener('transport:listening', async (event) => {
            const addresses = libp2p.getMultiaddrs().map(addr => addr.toString());
+           console.log('!!!!!!!!!!!! transport:listening !!!!!!!!!!!!!!!')
             await updateAllAddressesInComponent(addresses);
             log(`Transport listening, адреса обновлены: ${addresses.length}`, 'info');
         });
 
         // @ts-ignore
         libp2p.addEventListener('self:peer:update', async (event) => {
+            console.log('!!!!!!!!!!!! self:peer:update !!!!!!!!!!!!!!!')
             const myAddrs = libp2p.getMultiaddrs();
             const myCircuitAddrs = myAddrs.filter(addr =>
                 addr.toString().includes('/p2p-circuit/')
