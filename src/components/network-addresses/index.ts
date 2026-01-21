@@ -951,8 +951,11 @@ export class NetworkAddresses extends BaseComponent {
     //     return false;
     // }
 
+    private isProcess: boolean = false
     public async copyAddress(target: any, address: string): Promise<void> {
         try {
+            if(this.isProcess) return
+            this.isProcess = true
             await navigator.clipboard.writeText(address);
 
             // Показываем визуальную обратную связь
@@ -964,9 +967,11 @@ export class NetworkAddresses extends BaseComponent {
             setTimeout(() => {
                 button.innerHTML = originalText;
                 button.style.background = '';
+                this.isProcess = false
             }, 2000);
         } catch (error) {
             console.error('Ошибка копирования адреса:', error);
+            this.isProcess = false
         }
     }
 
