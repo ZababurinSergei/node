@@ -198,17 +198,33 @@ export async function createLibp2pNode(options: Libp2pBrowserOptions = {}): Prom
         // @ts-ignore
         libp2p.addEventListener('transport:close', async (event) => {
             console.log('!!!!!!!!!!!! transport:close !!!!!!!!!!!!!!!')
-            const addresses = libp2p.getMultiaddrs().map(addr => addr.toString());
-            await updateAllAddressesInComponent(addresses);
-            log(`Transport listening close, адреса обновлены: ${addresses.length}`, 'info');
+            // const addresses = libp2p.getMultiaddrs().map(addr => addr.toString());
+            // await updateAllAddressesInComponent(addresses);
+            const myAddrs = libp2p.getMultiaddrs();
+            const myCircuitAddrs = myAddrs.filter(addr =>
+                addr.toString().includes('/p2p-circuit/')
+            );
+
+            if (myCircuitAddrs.length > 0) {
+                await updateNetworkAddressesComponent(myCircuitAddrs);
+            }
+            // log(`Transport listening close, адреса обновлены: ${addresses.length}`, 'info');
         });
 
         // @ts-ignore
         libp2p.addEventListener('transport:listening', async (event) => {
-           const addresses = libp2p.getMultiaddrs().map(addr => addr.toString());
-           console.log('!!!!!!!!!!!! transport:listening !!!!!!!!!!!!!!!')
-            await updateAllAddressesInComponent(addresses);
-            log(`Transport listening, адреса обновлены: ${addresses.length}`, 'info');
+           // const addresses = libp2p.getMultiaddrs().map(addr => addr.toString());
+            const myAddrs = libp2p.getMultiaddrs();
+            const myCircuitAddrs = myAddrs.filter(addr =>
+                addr.toString().includes('/p2p-circuit/')
+            );
+
+            if (myCircuitAddrs.length > 0) {
+                await updateNetworkAddressesComponent(myCircuitAddrs);
+            }
+           // console.log('!!!!!!!!!!!! transport:listening !!!!!!!!!!!!!!!')
+            // await updateAllAddressesInComponent(addresses);
+            // log(`Transport listening, адреса обновлены: ${addresses.length}`, 'info');
         });
 
         // @ts-ignore
@@ -223,31 +239,31 @@ export async function createLibp2pNode(options: Libp2pBrowserOptions = {}): Prom
                 await updateNetworkAddressesComponent(myCircuitAddrs);
             }
 
-            const allAddresses = myAddrs.map(addr => addr.toString());
-            await updateAllAddressesInComponent(allAddresses);
+            // const allAddresses = myAddrs.map(addr => addr.toString());
+            // await updateAllAddressesInComponent(allAddresses);
         });
 
-        async function updateAllAddressesInComponent(allAddresses: string[]): Promise<void> {
-            try {
-                const networkAddressesComponent = await findNetworkAddressesComponent();
-
-                if (networkAddressesComponent) {
-                    const result = await networkAddressesComponent.postMessage({
-                        type: 'UPDATE_ADDRESSES',
-                        data: {
-                            addresses: allAddresses,
-                            source: 'libp2p-all-addresses-update'
-                        }
-                    });
-
-                    if (result?.success) {
-                        log(`Все адреса обновлены в Network Addresses: ${result.count || allAddresses.length} адресов`, 'debug');
-                    }
-                }
-            } catch (error) {
-                log(`Ошибка при обновлении всех адресов: ${error}`, 'warn');
-            }
-        }
+        // async function updateAllAddressesInComponent(allAddresses: string[]): Promise<void> {
+        //     try {
+        //         const networkAddressesComponent = await findNetworkAddressesComponent();
+        //
+        //         if (networkAddressesComponent) {
+        //             const result = await networkAddressesComponent.postMessage({
+        //                 type: 'UPDATE_ADDRESSES',
+        //                 data: {
+        //                     addresses: allAddresses,
+        //                     source: 'libp2p-all-addresses-update'
+        //                 }
+        //             });
+        //
+        //             if (result?.success) {
+        //                 log(`Все адреса обновлены в Network Addresses: ${result.count || allAddresses.length} адресов`, 'debug');
+        //             }
+        //         }
+        //     } catch (error) {
+        //         log(`Ошибка при обновлении всех адресов: ${error}`, 'warn');
+        //     }
+        // }
 
         async function updateNetworkAddressesComponent(circuitAddresses: any[]): Promise<void> {
             try {

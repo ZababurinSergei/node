@@ -148,17 +148,6 @@ export function renderAddressesList({ state = {} as TemplateContext['state'] }: 
                         <span class="info-value address-value" title="${escapeHtml(address)}">
                             ${escapeHtml(address)}
                         </span>
-                        <div class="address-actions">
-                            <button class="action-btn copy-btn" data-address="${escapeHtml(address)}" title="Copy Address">
-                                📋
-                            </button>
-                            <button class="action-btn test-btn" data-address="${escapeHtml(address)}" title="Test Connection">
-                                🧪
-                            </button>
-                            <button class="action-btn remove-btn" data-address="${escapeHtml(address)}" title="Remove Address">
-                                ❌
-                            </button>
-                        </div>
                     </div>
                 </div>
             `).join('')}
