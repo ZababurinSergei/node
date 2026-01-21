@@ -15,6 +15,7 @@ import {multiaddr} from '@multiformats/multiaddr'
 import {peerIdFromString} from '@libp2p/peer-id'
 import {circuitRelayTransport} from '@libp2p/circuit-relay-v2'
 import { dcutr } from '@libp2p/dcutr';
+import {simpleMetrics} from "@libp2p/simple-metrics";
 
 export interface Libp2pBrowserOptions {
     onPeerDiscovered?: (peerId: string, multiaddrs: string[]) => void
@@ -168,6 +169,12 @@ export async function createLibp2pNode(options: Libp2pBrowserOptions = {}): Prom
 
         const libp2p = await createLibp2p({
             ...(peerId && { peerId }),
+            metrics: simpleMetrics({
+                onMetrics: (metrics) => {
+                    // do something with metrics
+                    console.log('------ METRICS ------', metrics)
+                }
+            }),
             addresses: {
                 listen: [
                     '/p2p-circuit',

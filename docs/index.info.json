@@ -1,6 +1,6 @@
 {
   "name": "index",
-  "timestamp": "2026-01-21T12:37:42.743Z",
+  "timestamp": "2026-01-21T18:14:16.633Z",
   "paths": {
     "source": "/home/sergei/Рабочий стол/in-progress/libp2p-browser/packages/node/src",
     "output": "/home/sergei/Рабочий стол/in-progress/libp2p-browser/packages/node/docs"
@@ -46,6 +46,7 @@
       "@libp2p/peer-store",
       "@libp2p/ping",
       "@libp2p/pubsub-peer-discovery",
+      "@libp2p/simple-metrics",
       "@libp2p/utils",
       "@libp2p/webrtc",
       "@libp2p/websockets",
@@ -62,7 +63,7 @@
       "reflect-metadata",
       "uint8arrays"
     ],
-    "totalDependencies": 35,
+    "totalDependencies": 36,
     "cssFiles": 15,
     "virtualCss": true
   }
