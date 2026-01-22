@@ -171,8 +171,9 @@ export async function createLibp2pNode(options: Libp2pBrowserOptions = {}): Prom
             ...(peerId && { peerId }),
             metrics: simpleMetrics({
                 onMetrics: (metrics) => {
-                    // do something with metrics
-                    console.log('------ METRICS ------', metrics)
+                    document.dispatchEvent(new CustomEvent('chat-metrics', {
+                        detail: metrics
+                    }))
                 }
             }),
             addresses: {
